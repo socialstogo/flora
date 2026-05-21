@@ -578,6 +578,41 @@ def get_plans(user):
 
 # ── START ─────────────────────────────────────────────────────────────────────
 
+
+@app.route("/seed-user", methods=["POST", "OPTIONS"])
+def seed_user():
+    if request.method == "OPTIONS": return "", 204
+    data = request.get_json() or {}
+    if data.get("secret") != os.environ.get("ADMIN_SECRET", "flora_seed_2026"):
+        return jsonify({"error": "Unauthorized"}), 401
+    email = data.get("email", "")
+    if not email: return jsonify({"error": "Email required"}), 400
+    db = get_db()
+    user = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+    if not user: db.close(); return jsonify({"error": "User not found"}), 404
+    user_id = user["id"]
+    profile = data.get("profile")
+    if profile:
+        profile_data = json.dumps(profile)
+        existing = db.execute("SELECT user_id FROM profiles WHERE user_id=?", (user_id,)).fetchone()
+        if existing: db.execute("UPDATE profiles SET data=?, updated_at=? WHERE user_id=?", (profile_data, datetime.now().isoformat(), user_id))
+        else: db.execute("INSERT INTO profiles (user_id, data) VALUES (?,?)", (user_id, profile_data))
+    for lab in data.get("labs", []):
+        db.execute("INSERT INTO labs (user_id, date, data) VALUES (?,?,?)", (user_id, lab.get("date", datetime.now().strftime("%Y-%m-%d")), json.dumps(lab)))
+    for m in data.get("metrics", []):
+        db.execute("INSERT INTO metrics (user_id, date, data) VALUES (?,?,?)", (user_id, m.get("date", datetime.now().strftime("%Y-%m-%d")), json.dumps(m)))
+    plan = data.get("plan")
+    if plan: db.execute("INSERT INTO plans (user_id, month, content) VALUES (?,?,?)", (user_id, datetime.now().strftime("%Y-%m"), plan))
+    inventory = data.get("inventory")
+    if inventory:
+        inv_data = json.dumps(inventory)
+        existing = db.execute("SELECT user_id FROM inventory WHERE user_id=?", (user_id,)).fetchone()
+        if existing: db.execute("UPDATE inventory SET data=? WHERE user_id=?", (inv_data, user_id))
+        else: db.execute("INSERT INTO inventory (user_id, data) VALUES (?,?)", (user_id, inv_data))
+    db.commit(); db.close()
+    return jsonify({"success": True})
+
+
 init_db()
 
 if __name__ == "__main__":
