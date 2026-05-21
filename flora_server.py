@@ -10,7 +10,7 @@ Deploy to Railway:
 5. Railway auto-deploys on push
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 import sqlite3, hashlib, secrets, json, os, smtplib
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
@@ -18,23 +18,23 @@ import urllib.request, urllib.parse
 
 app = Flask(__name__)
 
-@app.before_request
-def handle_preflight():
-    if request.method == "OPTIONS":
-        from flask import make_response
-        resp = make_response()
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Claude-Key'
-        resp.headers['Access-Control-Max-Age'] = '86400'
-        return resp
-
-@app.after_request
+@app.after_request  
 def after_request(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Claude-Key'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Claude-Key'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,DELETE,OPTIONS'
+    response.headers['Access-Control-Max-Age'] = '3600'
     return response
+
+@app.route('/', methods=['OPTIONS'])
+@app.route('/<path:path>', methods=['OPTIONS'])
+def options_handler(path=''):
+    response = make_response()
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Claude-Key'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,DELETE,OPTIONS'
+    response.headers['Access-Control-Max-Age'] = '3600'
+    return response, 200
 
 DB_PATH = os.environ.get("DB_PATH", "/data/flora.db")
 SECRET   = os.environ.get("FLASK_SECRET", secrets.token_hex(32))
