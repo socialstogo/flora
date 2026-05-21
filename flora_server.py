@@ -11,24 +11,29 @@ Deploy to Railway:
 """
 
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 import sqlite3, hashlib, secrets, json, os, smtplib
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 import urllib.request, urllib.parse
 
 app = Flask(__name__)
-CORS(app, 
-     origins="*",
-     allow_headers=["Content-Type", "Authorization", "X-Claude-Key"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-     supports_credentials=False)
+
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        from flask import make_response
+        resp = make_response()
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Claude-Key'
+        resp.headers['Access-Control-Max-Age'] = '86400'
+        return resp
 
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Claude-Key')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Claude-Key'
     return response
 
 DB_PATH = os.environ.get("DB_PATH", "/data/flora.db")
@@ -624,7 +629,51 @@ def seed_user():
     return jsonify({"success": True})
 
 
+
+def seed_owner_data():
+    """Seed owner data if account exists and has no profile"""
+    try:
+        db = get_db()
+        user = db.execute("SELECT * FROM users WHERE email=?", ("ccvilch@gmail.com",)).fetchone()
+        if not user:
+            db.close()
+            return
+        user_id = user["id"]
+        # Check if profile already exists
+        existing = db.execute("SELECT user_id FROM profiles WHERE user_id=?", (user_id,)).fetchone()
+        if existing:
+            db.close()
+            return  # Already seeded
+        
+        profile = {"name":"","age":33,"height":"5'5","weight":130,"goalWeight":125,"conditions":["Lean PCOS","Hashimoto's thyroiditis (controlled)","Melasma"],"symptoms":["Always feeling cold","Melasma / skin pigmentation","Hair thinning","Unwanted hair growth","Constipation","Crying easily","Weight gain (especially midsection)"],"goal":"Body recomposition (build muscle + lose fat)","meds":"Metformin 500mg twice daily, Semaglutide weekly injection","diet":["No grains or pasta"],"fitnessLevel":"Active — 3-4x/week","exerciseTypes":"Weight training, walking, swimming","workoutTime":"14:00","exerciseGoal":"Body recomposition","periodStart":"","cycleLength":28,"calorieTarget":1450,"proteinTarget":110,"waterTarget":11,"sleep":"7-8 hours","stress":"6","job":"Entrepreneur / high stress","alcohol":"Occasional (1-2x/month)","apiKey":"","onboarded":True}
+        
+        db.execute("INSERT INTO profiles (user_id, data) VALUES (?,?)", (user_id, json.dumps(profile)))
+        
+        # Labs
+        labs = {"date":"2026-04-13","prog":15.0,"estradiol":134,"tsh":2.75,"ir":4,"ft":"pending","shbg":"pending","crp":0.6,"dheas":787,"hba1c":4.7,"fib4":0.62,"hdl":64,"ldl":89,"triglycerides":63,"apob":79,"alt":16,"ast":19,"ggt":11,"platelet":251,"notes":"Quest Diagnostics Apr 13 2026 Day 22 Fasting Lean PCOS confirmed Fatty liver resolved No insulin resistance"}
+        db.execute("INSERT INTO labs (user_id, date, data) VALUES (?,?,?)", (user_id, "2026-04-13", json.dumps(labs)))
+        
+        # Metrics
+        for m in [{"date":"2026-04-01","weight":132,"bf":26,"waist":28,"hip":38,"energy":6,"mood":6},{"date":"2026-05-01","weight":130,"bf":25,"waist":27.2,"hip":37.2,"energy":7,"mood":8},{"date":"2026-05-20","weight":130,"bf":25,"waist":27,"hip":37,"energy":7,"mood":7}]:
+            db.execute("INSERT INTO metrics (user_id, date, data) VALUES (?,?,?)", (user_id, m["date"], json.dumps(m)))
+        
+        # Plan
+        plan = "FLORA PERSONALIZED WELLNESS PLAN — May 2026\n\nYOUR WELLNESS PROFILE\nLean PCOS confirmed with Hashimoto's (controlled, TPO <1) and Melasma. April 2026 labs: IR score 4, HbA1c 4.7%, hsCRP 0.6 — no insulin resistance. Fatty liver resolved (FIB-4 0.62). Symptoms driven by estrogen/progesterone imbalance of Lean PCOS, compounded by 14 months Santal 33 + EDITION diffuser exposure (both removed). In the recovery arc.\n\nTOP 3 PRIORITIES\n1. Progesterone support — Vitex + Vitamin C 1000mg + Magnesium + Zinc daily\n2. Anti-androgen — Spearmint tea 2 cups daily (29% testosterone reduction in trials)\n3. Estrogen clearance — Cruciferous veg daily + chia seeds 2 tbsp\n\nSUPPLEMENTS\nMorning: Ovasitol, Vitamin C 1000mg, B6 P5P 50mg, Vitex 400mg, Spearmint 900mg\nDinner: Zinc 30mg, Omega-3 2g\nAfter dinner: Chia seeds 2 tbsp in water\nBedtime: Magnesium Glycinate 300mg, Probiotic 50B CFU\nDaily: 2 Brazil nuts (selenium)\n\nNEXT LABS\nFree Testosterone + SHBG (questhealth.com ~$89)\nDHEA-S + Cortisol (~$99)"
+        db.execute("INSERT INTO plans (user_id, month, content) VALUES (?,?,?)", (user_id, "2026-05", plan))
+        
+        # Inventory
+        inventory = [{"name":"Wild Sockeye Salmon","cat":"Protein","qty":2,"unit":"bags","days":14,"emoji":"🐟"},{"name":"Kirkland Greek Yogurt","cat":"Dairy","qty":1,"unit":"tub","days":10,"emoji":"🥛"},{"name":"Kirkland Pasture-Raised Eggs","cat":"Protein","qty":60,"unit":"count","days":21,"emoji":"🥚"},{"name":"Organic Baby Spinach","cat":"Vegetables","qty":2,"unit":"bags","days":7,"emoji":"🥬"},{"name":"Organic Avocados","cat":"Vegetables","qty":8,"unit":"count","days":7,"emoji":"🥑"},{"name":"Organic Black Beans","cat":"Legumes","qty":6,"unit":"cans","days":30,"emoji":"🫘"},{"name":"Organic Chickpeas","cat":"Legumes","qty":6,"unit":"cans","days":30,"emoji":"🫘"},{"name":"Kirkland Dried Lentils","cat":"Legumes","qty":1,"unit":"bag","days":60,"emoji":"🫘"},{"name":"Organic Chia Seeds","cat":"Nuts & Seeds","qty":1,"unit":"bag","days":30,"emoji":"🌱"},{"name":"Organic Pumpkin Seeds","cat":"Nuts & Seeds","qty":1,"unit":"bag","days":21,"emoji":"🎃"},{"name":"Kirkland EVOO","cat":"Oils","qty":1,"unit":"tin","days":60,"emoji":"🫒"},{"name":"Spearmint Tea","cat":"Pantry","qty":2,"unit":"boxes","days":30,"emoji":"🍵"},{"name":"Lindt 85% Dark Chocolate","cat":"Pantry","qty":3,"unit":"bars","days":21,"emoji":"🍫"},{"name":"Wild Planet Tuna","cat":"Protein","qty":6,"unit":"cans","days":30,"emoji":"🐟"},{"name":"Organic Mixed Berries","cat":"Frozen","qty":2,"unit":"bags","days":30,"emoji":"🫐"},{"name":"Ovasitol Powder","cat":"Supplements","qty":1,"unit":"bottle","days":90,"emoji":"💊"}]
+        db.execute("INSERT INTO inventory (user_id, data) VALUES (?,?)", (user_id, json.dumps(inventory)))
+        
+        db.commit()
+        db.close()
+        print("Owner data seeded successfully")
+    except Exception as e:
+        print("Seed error:", e)
+
+
 init_db()
+seed_owner_data()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
@@ -650,4 +699,3 @@ START COMMAND:
 ──────────────
 python flora_server.py
 """
-
