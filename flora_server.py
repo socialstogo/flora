@@ -630,6 +630,156 @@ def seed_user():
 
 
 
+
+@app.route("/generate-profile", methods=["POST", "OPTIONS"])
+def generate_profile():
+    if request.method == "OPTIONS": return "", 204
+    data = request.get_json() or {}
+    profile = data.get("profile", {})
+    
+    api_key = CLAUDE_KEY
+    if not api_key:
+        return jsonify({"error": "No API key configured on server"}), 500
+
+    name = profile.get("name", "User")
+    age = profile.get("age", "")
+    conditions = ", ".join(profile.get("conditions", [])) or "None specified"
+    symptoms = ", ".join(profile.get("symptoms", [])) or "None specified"
+    goal = profile.get("goal", "General wellness")
+    meds = profile.get("meds", "None")
+    diet = ", ".join(profile.get("diet", [])) or "No restrictions"
+    fitness = profile.get("fitnessLevel", "")
+    exercise_types = profile.get("exerciseTypes", "")
+    workout_time = profile.get("workoutTime", "")
+    exercise_goal = profile.get("exerciseGoal", "")
+    sleep = profile.get("sleep", "")
+    stress = profile.get("stress", "")
+    job = profile.get("job", "")
+    lab_notes = profile.get("labNotes", "")
+    other = profile.get("other", "")
+    weight = profile.get("weight", "")
+    goal_weight = profile.get("goalWeight", "")
+
+    prompt = f"""You are FLORA, a functional medicine wellness AI. A new user just completed their health intake questionnaire. Generate a complete personalized wellness profile for them.
+
+USER PROFILE:
+Name: {name}, Age: {age}, Weight: {weight} lbs, Goal weight: {goal_weight} lbs
+CONDITIONS: {conditions}
+SYMPTOMS: {symptoms}
+MAIN GOAL: {goal}
+MEDICATIONS: {meds}
+DIETARY PREFERENCES: {diet}
+FITNESS LEVEL: {fitness}
+EXERCISE TYPES THEY ENJOY: {exercise_types}
+PREFERRED WORKOUT TIME: {workout_time}
+EXERCISE GOAL: {exercise_goal}
+SLEEP: {sleep}
+STRESS LEVEL: {stress}/10
+JOB TYPE: {job}
+LAB NOTES: {lab_notes if lab_notes else "None provided"}
+OTHER CONTEXT: {other if other else "None"}
+
+Generate a complete personalized wellness profile. Return ONLY valid JSON with exactly this structure:
+
+{{
+  "plan": "A 400-500 word personalized wellness plan. Section headers: YOUR WELLNESS PROFILE, WHY WE CHOSE YOUR PLAN, TOP 3 PRIORITIES, SUPPLEMENT PROTOCOL, NUTRITION FRAMEWORK, EXERCISE PROTOCOL, 30-DAY MILESTONES. Be specific to their conditions. Explain WHY each recommendation was chosen for them personally.",
+  
+  "supplements": [
+    {{"name": "supplement name", "dose": "dose and frequency", "time": "morning/dinner/bedtime/with meals", "benefit": "why this person specifically needs this"}}
+  ],
+  
+  "meals": [
+    {{"type": "Breakfast", "name": "meal name", "emoji": "single emoji", "cals": 400, "protein": 35, "carbs": 20, "fat": 18, "fiber": 8, "omega": 0.3}},
+    {{"type": "Pre-Workout", "name": "meal name", "emoji": "single emoji", "cals": 180, "protein": 8, "carbs": 25, "fat": 3, "fiber": 5, "omega": 0.1}},
+    {{"type": "Lunch", "name": "meal name", "emoji": "single emoji", "cals": 480, "protein": 38, "carbs": 30, "fat": 20, "fiber": 10, "omega": 0.5}},
+    {{"type": "Post-Workout", "name": "meal name", "emoji": "single emoji", "cals": 200, "protein": 20, "carbs": 18, "fat": 6, "fiber": 3, "omega": 0.1}},
+    {{"type": "Dinner", "name": "meal name", "emoji": "single emoji", "cals": 500, "protein": 42, "carbs": 28, "fat": 18, "fiber": 12, "omega": 0.3}}
+  ],
+  
+  "shopping": [
+    {{"category": "category name", "items": [
+      {{"name": "item name", "detail": "why this person needs this item", "brand": "recommended brand or Any"}}
+    ]}}
+  ],
+  
+  "insights": [
+    {{"icon": "emoji", "color": "sage|rose|gold|blue", "text": "<strong>Key insight title.</strong> Explanation specific to this person's conditions and goals."}}
+  ],
+  
+  "calorie_target": 1450,
+  "protein_target": 110,
+  "water_target": 8
+}}
+
+Rules:
+- supplements: 5-10 items based on their specific conditions
+- meals: exactly 5 items (one per type), tailored to their dietary restrictions  
+- shopping: 4-6 categories, 4-6 items each, based on their meal plan and conditions
+- insights: 4-6 items specific to their conditions and lab values
+- If vegetarian/vegan: no meat in meals
+- If no grains: no pasta/rice/bread in meals
+- If pescatarian: fish ok, no meat
+- Calorie target: adjust based on their weight and goals
+- All content must be specific to THIS person, not generic
+
+Return ONLY the JSON object, no other text."""
+
+    try:
+        req_data = json.dumps({
+            "model": "claude-sonnet-4-20250514",
+            "max_tokens": 4000,
+            "messages": [{"role": "user", "content": prompt}]
+        }).encode()
+
+        req = urllib.request.Request(
+            "https://api.anthropic.com/v1/messages",
+            data=req_data,
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01"
+            },
+            method="POST"
+        )
+        resp = urllib.request.urlopen(req, timeout=60)
+        result = json.loads(resp.read())
+        text = result["content"][0]["text"]
+        
+        # Parse JSON from response
+        json_match = re.search(r'\{[\s\S]*\}', text)
+        if not json_match:
+            return jsonify({"error": "Could not parse AI response"}), 500
+            
+        generated = json.loads(json_match.group())
+        
+        # Save to user profile if authenticated
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        user = get_user_by_token(token) if token else None
+        if user:
+            db = get_db()
+            profile["generatedContent"] = generated
+            profile["calorie_target"] = generated.get("calorie_target", 1450)
+            profile["protein_target"] = generated.get("protein_target", 110)
+            profile["water_target"] = generated.get("water_target", 8)
+            profile_data = json.dumps(profile)
+            existing = db.execute("SELECT user_id FROM profiles WHERE user_id=?", (user["id"],)).fetchone()
+            if existing:
+                db.execute("UPDATE profiles SET data=?, updated_at=? WHERE user_id=?",
+                          (profile_data, datetime.now().isoformat(), user["id"]))
+            else:
+                db.execute("INSERT INTO profiles (user_id, data) VALUES (?,?)", (user["id"], profile_data))
+            # Save plan
+            db.execute("INSERT INTO plans (user_id, month, content) VALUES (?,?,?)",
+                      (user["id"], datetime.now().strftime("%Y-%m"), generated.get("plan", "")))
+            db.commit()
+            db.close()
+        
+        return jsonify({"success": True, "generated": generated})
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 def seed_owner_data():
     """Seed owner data if account exists and has no profile"""
     try:
