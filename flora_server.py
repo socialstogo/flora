@@ -18,7 +18,18 @@ from email.mime.text import MIMEText
 import urllib.request, urllib.parse
 
 app = Flask(__name__)
-CORS(app, origins="*")
+CORS(app, 
+     origins="*",
+     allow_headers=["Content-Type", "Authorization", "X-Claude-Key"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     supports_credentials=False)
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Claude-Key')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 DB_PATH = os.environ.get("DB_PATH", "/data/flora.db")
 SECRET   = os.environ.get("FLASK_SECRET", secrets.token_hex(32))
@@ -639,3 +650,4 @@ START COMMAND:
 ──────────────
 python flora_server.py
 """
+
