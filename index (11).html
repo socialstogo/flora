@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="FLORA">
+<meta name="theme-color" content="#faf7f2">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+<title>FLORA — Wellness OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#faf7f2;--cream2:#f4efe6;--cream3:#ece5d8;
+  --border:#e2d9cc;--border2:#d4c9b8;
+  --text:#2c2416;--text2:#5c4e3a;--text3:#9c8a72;--text4:#bfae97;
+  --accent:#7c6a52;--sage:#7a8c72;--rose:#c4857a;--gold:#c8a256;--blue:#6b8fa8;
+  --danger:#c44a3a;
+  --r:18px;--rs:12px;
+  --sh:0 2px 16px rgba(44,36,22,.06);--shm:0 4px 24px rgba(44,36,22,.10);
+  --fd:'Cormorant Garamond',serif;--fb:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-size:15px}
+body{background:var(--cream);color:var(--text);font-family:var(--fb);line-height:1.55;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.on{display:flex}
+
+/* AUTH */
+#s-auth{padding:48px 24px 32px;max-width:420px;margin:0 auto;justify-content:center}
+.auth-logo{font-family:var(--fd);font-size:2.8rem;font-weight:300;letter-spacing:.12em;text-align:center;margin-bottom:6px}
+.auth-tag{font-size:.72rem;color:var(--text3);text-align:center;letter-spacing:.15em;text-transform:uppercase;margin-bottom:36px}
+.auth-tabs{display:flex;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:22px}
+.auth-tab{flex:1;padding:11px;text-align:center;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--text3);transition:all .2s}
+.auth-tab.on{background:var(--text);color:var(--cream)}
+.auth-panel{display:none;flex-direction:column;gap:12px}
+.auth-panel.on{display:flex}
+.err-box{background:#fdf0ed;border:1px solid #f0ccc8;border-radius:10px;padding:10px 12px;font-size:.78rem;color:var(--danger);display:none}
+.auth-div{display:flex;align-items:center;gap:10px;margin:2px 0}
+.auth-div::before,.auth-div::after{content:'';flex:1;height:1px;background:var(--border)}
+.auth-div span{font-size:.72rem;color:var(--text4)}
+.auth-switch{font-size:.78rem;color:var(--text3);text-align:center}
+.auth-switch span{color:var(--accent);cursor:pointer;font-weight:600}
+.auth-link{font-size:.75rem;color:var(--accent);cursor:pointer;text-align:right;margin-top:-4px}
+
+/* QUESTIONNAIRE */
+#s-quest{padding:0;max-width:420px;margin:0 auto;width:100%}
+.q-hdr{padding:36px 24px 18px;background:var(--cream2);border-bottom:1px solid var(--border)}
+.q-prog{height:3px;background:var(--border);border-radius:2px;margin-bottom:14px;overflow:hidden}
+.q-prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
+.q-step-lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);margin-bottom:6px}
+.q-title{font-family:var(--fd);font-size:1.8rem;font-weight:300;line-height:1.2}
+.q-sub{font-size:.82rem;color:var(--text3);margin-top:6px;line-height:1.6}
+.q-body{flex:1;overflow-y:auto;padding:22px 24px;-webkit-overflow-scrolling:touch}
+.q-foot{padding:14px 24px;border-top:1px solid var(--border);background:var(--cream);display:flex;gap:10px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+.q-step{display:none}
+.q-step.on{display:block}
+.chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{padding:8px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:.8rem;cursor:pointer;color:var(--text2);background:#fff;transition:all .2s;-webkit-user-select:none}
+.chip.on{border-color:var(--accent);background:var(--cream2);color:var(--accent);font-weight:600}
+
+/* AI LOADING */
+#s-ai{align-items:center;justify-content:center;gap:18px;padding:40px;text-align:center}
+.ai-logo{font-family:var(--fd);font-size:2rem;font-weight:300;letter-spacing:.1em}
+.ai-msg{font-size:.85rem;color:var(--text3);line-height:1.7;max-width:280px}
+.dots{display:flex;gap:6px;justify-content:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:db .8s ease infinite}
+.dot:nth-child(2){animation-delay:.15s}
+.dot:nth-child(3){animation-delay:.3s}
+@keyframes db{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+/* APP SHELL */
+#s-app{flex-direction:column}
+header{position:sticky;top:0;z-index:100;background:rgba(250,247,242,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+.hdr-logo{font-family:var(--fd);font-size:1.5rem;font-weight:300;letter-spacing:.1em}
+.hdr-r{display:flex;align-items:center;gap:8px}
+.hdr-btn{width:34px;height:34px;border-radius:50%;background:var(--cream2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(250,247,242,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,6px);z-index:100}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 6px;cursor:pointer;gap:3px;-webkit-user-select:none}
+.ni-ico{font-size:1.2rem;transition:transform .2s}
+.ni-lbl{font-size:.55rem;font-weight:600;color:var(--text4);text-transform:uppercase;letter-spacing:.06em}
+.ni.on .ni-lbl{color:var(--accent)}
+.ni.on .ni-ico{transform:translateY(-2px)}
+main{padding:18px 18px 100px;max-width:430px;margin:0 auto;flex:1;overflow-y:auto}
+.view{display:none}
+.view.on{display:block;animation:fu .25s ease}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* SHARED COMPONENTS */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:14px;box-shadow:var(--sh)}
+.card-sage{background:linear-gradient(135deg,#f0f4ed,#e8ede4);border-color:#d4dccf}
+.card-gold{background:linear-gradient(135deg,#fdf5e6,#f7ecda);border-color:#e8d8b8}
+.card-ai{background:linear-gradient(135deg,var(--cream2),#fff);border:1px solid var(--border2);border-radius:var(--r);padding:20px;margin-bottom:14px;box-shadow:var(--shm)}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;margin-top:6px}
+.st{font-family:var(--fd);font-size:1.4rem;font-weight:400}
+.sa{font-size:.72rem;font-weight:600;color:var(--accent);cursor:pointer;padding:5px 10px;background:var(--cream2);border:1px solid var(--border);border-radius:20px}
+.greet-time{font-size:.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.12em}
+.greet-name{font-family:var(--fd);font-size:2.1rem;font-weight:300;margin-top:2px}
+.greet-phase{font-size:.78rem;color:var(--text2);margin-top:5px;display:flex;align-items:center;gap:8px}
+.phase-pip{width:7px;height:7px;border-radius:50%;flex-shrink:0;animation:pp 2.5s ease infinite}
+@keyframes pp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.streak{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;margin-bottom:18px;background:linear-gradient(135deg,#fff8ee,#fef3e2);border:1px solid #f0d89a;border-radius:20px;font-size:.8rem;font-weight:500;color:var(--gold)}
+.ring-wrap{display:flex;align-items:center;gap:20px}
+.ring-svg{transform:rotate(-90deg);flex-shrink:0}
+.ring-bg{fill:none;stroke:var(--cream3);stroke-width:7}
+.ring-prog{fill:none;stroke-width:7;stroke-linecap:round;stroke:var(--accent);transition:stroke-dashoffset 1.2s}
+.ring-val{font-family:var(--fd);font-size:2.1rem;font-weight:300}
+.ring-of{font-size:.75rem;color:var(--text3)}
+.macro-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.macro-pill{background:var(--cream2);border-radius:12px;padding:11px;border:1px solid var(--border);text-align:center}
+.mv{font-family:var(--fd);font-size:1.3rem;font-weight:400}
+.ml{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3)}
+.mbar{height:3px;background:var(--border);border-radius:2px;margin-top:7px;overflow:hidden}
+.mfill{height:100%;border-radius:2px;transition:width 1.2s}
+.w-glasses{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0 8px}
+.wg{width:33px;height:33px;border-radius:9px;border:1.5px solid var(--border);background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:.95rem;cursor:pointer;transition:all .2s}
+.wg.on{background:linear-gradient(135deg,#ddeeff,#c8e4f8);border-color:var(--blue)}
+.pbar{height:6px;background:var(--cream3);border-radius:4px;overflow:hidden}
+.pb{height:100%;border-radius:4px;transition:width 1.2s}
+.mc{background:#fff;border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .2s}
+.mc:hover{transform:translateX(3px)}
+.mi{width:42px;height:42px;border-radius:12px;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.mtype{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text3)}
+.mname{font-size:.88rem;font-weight:500;margin:2px 0}
+.mmacros{font-size:.7rem;color:var(--text3)}
+.mcals{font-family:var(--fd);font-size:1.1rem;text-align:right}
+.mstat{font-size:.65rem;font-weight:600;text-align:right;margin-top:2px}
+.logged{color:var(--sage)}.pending{color:var(--text4)}
+.si{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.si:last-child{border-bottom:none}
+.sc{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--cream2);font-size:.7rem;transition:all .2s}
+.sc.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.sname{font-size:.85rem;font-weight:500}
+.sdose{font-size:.7rem;color:var(--text3);margin-top:1px}
+.stime{font-size:.65rem;font-weight:600;color:var(--accent);padding:2px 7px;background:var(--cream2);border-radius:10px;border:1px solid var(--border);white-space:nowrap}
+.pi{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.pi:last-child{border-bottom:none}
+.pico{width:38px;height:38px;border-radius:11px;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.pico.on{background:linear-gradient(135deg,#e8f0e4,#d8e8d2)}
+.btn{display:block;width:100%;padding:14px;background:var(--text);color:var(--cream);border:none;border-radius:var(--rs);font-family:var(--fb);font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;text-align:center}
+.btn:hover{opacity:.9;transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-out{background:transparent;color:var(--text2);border:1.5px solid var(--border2)}
+.btn-sage{background:var(--sage);color:#fff}
+.btn-sm{padding:9px 16px;width:auto;font-size:.8rem;border-radius:10px;display:inline-block}
+.fl{display:block;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:6px}
+.fi{width:100%;padding:12px 14px;background:var(--cream2);border:1.5px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:var(--fb);font-size:.9rem;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.fi:focus{border-color:var(--accent);background:#fff}
+textarea.fi{resize:vertical;min-height:80px}
+.fg{margin-bottom:14px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-bg{position:fixed;inset:0;background:rgba(44,36,22,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal-bg.hide{display:none}
+.modal{width:100%;max-width:430px;background:var(--cream);border-radius:24px 24px 0 0;border:1px solid var(--border);border-bottom:none;padding:18px 22px calc(22px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow-y:auto}
+.mh{width:38px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px}
+.mtitle{font-family:var(--fd);font-size:1.4rem;font-weight:400;margin-bottom:18px}
+.toast{position:fixed;top:66px;left:14px;right:14px;max-width:402px;margin:0 auto;background:var(--text);color:var(--cream);border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:11px;z-index:300;box-shadow:0 8px 30px rgba(0,0,0,.2)}
+.toast.hide{display:none}
+.week-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:18px}
+.dc{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:8px 4px;text-align:center;cursor:pointer}
+.dc.today{border-color:var(--accent);background:var(--cream2)}
+.dn{font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.dd{font-family:var(--fd);font-size:1.05rem;margin:2px 0}
+.ddot{width:5px;height:5px;border-radius:50%;margin:0 auto}
+.ex-card{background:#fff;border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px;margin-bottom:10px}
+.sets-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.set-chip{padding:6px 13px;background:var(--cream2);border:1px solid var(--border);border-radius:8px;font-size:.75rem;color:var(--text2);cursor:pointer}
+.set-chip.done{background:#ecf2e8;border-color:#ccddc4;color:var(--sage);font-weight:600}
+.stats-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.sb{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;box-shadow:var(--sh)}
+.sv{font-family:var(--fd);font-size:1.5rem;font-weight:300;display:block}
+.slbl{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)}
+.shop-cat{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:#a08060;margin:16px 0 8px}
+.shop-cat:first-child{margin-top:0}
+.shop-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.shop-item:last-child{border-bottom:none}
+.sh-c{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--cream2);font-size:.7rem;transition:all .2s}
+.sh-c.on{background:var(--sage);border-color:var(--sage);color:#fff}
+.sh-name{font-size:.85rem;font-weight:500}
+.sh-detail{font-size:.7rem;color:var(--text3);margin-top:1px}
+.sh-brand{font-size:.65rem;color:var(--accent);padding:2px 7px;background:var(--cream2);border:1px solid var(--border);border-radius:8px;white-space:nowrap}
+.inv-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.inv-item:last-child{border-bottom:none}
+.inv-ico{width:40px;height:40px;border-radius:12px;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.stag{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px}
+.sok{background:#ecf2e8;color:var(--sage)}.slow{background:#fdf4e4;color:var(--gold)}.sout{background:#fdf0ed;color:var(--rose)}
+.filter-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;-webkit-overflow-scrolling:touch}
+.filter-row::-webkit-scrollbar{display:none}
+.fb-btn{padding:7px 14px;white-space:nowrap;background:#fff;border:1.5px solid var(--border);border-radius:20px;font-family:var(--fb);font-size:.78rem;font-weight:500;color:var(--text2);cursor:pointer}
+.fb-btn.on{background:var(--text);color:var(--cream);border-color:var(--text)}
+.rc{background:#fff;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px;cursor:pointer;box-shadow:var(--sh)}
+.rt{padding:18px 18px 14px;background:var(--cream2);display:flex;gap:14px;align-items:flex-start}
+.rb{padding:14px 18px 18px}
+.rmacs{display:flex;margin-bottom:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.rm{flex:1;padding:10px 8px;text-align:center;border-right:1px solid var(--border)}
+.rm:last-child{border-right:none}
+.rmv{font-family:var(--fd);font-size:1.1rem;display:block}
+.rml{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.il{list-style:none}
+.il li{font-size:.8rem;color:var(--text2);padding:3px 0;padding-left:12px;position:relative}
+.il li::before{content:'–';position:absolute;left:0;color:var(--accent)}
+.ai-badge{display:inline-block;padding:4px 10px;background:var(--text);color:var(--cream);border-radius:20px;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.ai-plan-text{font-size:.82rem;color:var(--text2);line-height:1.75;white-space:pre-wrap}
+.cyc-bar{display:flex;gap:4px;margin:10px 0 6px;height:10px}
+.cs{border-radius:5px}
+.cyc-m{background:#f0c4be;flex:5}.cyc-f{background:#b8d4ec;flex:8}.cyc-o{background:#b8e0c4;flex:2}.cyc-l{background:#ddc4e0;flex:13}
+.lab-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.lab-row:last-child{border-bottom:none}
+.lname{font-size:.82rem;font-weight:500}.lrange{font-size:.7rem;color:var(--text3);margin-top:2px}
+.lval{font-family:var(--fd);font-size:1.1rem;text-align:right}.lstatus{font-size:.65rem;font-weight:700;text-align:right;margin-top:2px}
+.lok{color:var(--sage)}.lborder{color:var(--gold)}.lwatch{color:var(--rose)}
+.ins{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.ins:last-child{border-bottom:none}
+.ins-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.isage{background:#ecf2e8}.irose{background:#fdf0ed}.igold{background:#fdf4e4}.iblue{background:#e8f0f8}
+.ins-text{font-size:.8rem;color:var(--text2);line-height:1.6}
+.scan-area{background:var(--cream2);border:2px dashed var(--border2);border-radius:var(--r);padding:40px 20px;text-align:center;margin-bottom:16px;cursor:pointer}
+.trend-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.trend-row:last-child{border-bottom:none}
+.trico{width:36px;height:36px;border-radius:10px;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.rest-timer{position:fixed;bottom:80px;left:16px;right:16px;max-width:398px;margin:0 auto;background:var(--text);color:var(--cream);border-radius:16px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;z-index:150}
+.rest-timer.hide{display:none}
+.muscle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.mb{background:var(--cream2);border:1.5px solid var(--border);border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;font-size:.75rem;color:var(--text2)}
+.mb.on{border-color:var(--accent);color:var(--accent);background:var(--cream3)}
+.mico{font-size:1.3rem;display:block;margin-bottom:3px}
+#scanner-container{position:relative;width:100%;border-radius:14px;overflow:hidden;background:#000;margin-bottom:14px;display:none}
+@keyframes scanline{0%{top:10px}100%{top:100px}}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+@media(min-width:430px){main,header,nav{max-width:430px;margin-left:auto;margin-right:auto}}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN (visible by default) -->
+<div id="s-auth" class="screen on">
+  <div class="auth-logo">FLORA</div>
+  <div class="auth-tag">Wellness OS</div>
+  <div class="auth-tabs">
+    <div class="auth-tab on" id="tab-login" onclick="switchTab('login')">Log In</div>
+    <div class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</div>
+  </div>
+
+  <!-- Login -->
+  <div class="auth-panel on" id="panel-login">
+    <div class="err-box" id="login-err"></div>
+    <div class="fg"><label class="fl">Email</label><input class="fi" id="l-email" type="email" placeholder="you@email.com" autocomplete="email"/></div>
+    <div class="fg"><label class="fl">Password</label><input class="fi" id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+    <div class="auth-link" onclick="switchTab('forgot')">Forgot password?</div>
+    <button class="btn" id="login-btn" onclick="doLogin()">Log In</button>
+    <div class="auth-switch">Don't have an account? <span onclick="switchTab('signup')">Sign up free</span></div>
+  </div>
+
+  <!-- Signup -->
+  <div class="auth-panel" id="panel-signup">
+    <div class="err-box" id="signup-err"></div>
+    <div class="fg"><label class="fl">Your Name</label><input class="fi" id="s-name" type="text" placeholder="Your name" autocomplete="name"/></div>
+    <div class="fg"><label class="fl">Email</label><input class="fi" id="s-email" type="email" placeholder="you@email.com" autocomplete="email"/></div>
+    <div class="fg"><label class="fl">Password (min 8 chars)</label><input class="fi" id="s-pass" type="password" placeholder="••••••••" autocomplete="new-password"/></div>
+    <button class="btn" id="signup-btn" onclick="doSignup()">Create Account</button>
+    <div class="auth-switch">Already have an account? <span onclick="switchTab('login')">Log in</span></div>
+  </div>
+
+  <!-- Forgot -->
+  <div class="auth-panel" id="panel-forgot">
+    <div class="err-box" id="forgot-err"></div>
+    <div style="font-size:.82rem;color:var(--text3);margin-bottom:14px;line-height:1.6">Enter your email to reset your password.</div>
+    <div class="fg"><label class="fl">Email</label><input class="fi" id="f-email" type="email" placeholder="you@email.com"/></div>
+    <button class="btn" onclick="doForgot()">Send Reset Link</button>
+    <div class="auth-switch"><span onclick="switchTab('login')">← Back to login</span></div>
+  </div>
+</div>
+
+<!-- QUESTIONNAIRE -->
+<div id="s-quest" class="screen">
+  <div class="q-hdr">
+    <div class="q-prog"><div class="q-prog-fill" id="q-prog-fill" style="width:10%"></div></div>
+    <div class="q-step-lbl" id="q-lbl">Step 1 of 10</div>
+    <div class="q-title" id="q-title">Let's personalize FLORA</div>
+    <div class="q-sub" id="q-sub">Your answers shape everything.</div>
+  </div>
+  <div class="q-body" id="q-body"></div>
+  <div class="q-foot">
+    <button class="btn btn-out btn-sm" id="q-back" onclick="qBack()" style="display:none">Back</button>
+    <button class="btn btn-sage" id="q-next" onclick="qNext()" style="flex:1">Continue →</button>
+  </div>
+</div>
+
+<!-- AI LOADING -->
+<div id="s-ai" class="screen">
+  <div class="ai-logo">FLORA ✦</div>
+  <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <div class="ai-msg" id="ai-msg">Building your personalized wellness plan…</div>
+</div>
+
+<!-- APP -->
+<div id="s-app" class="screen">
+  <header>
+    <div class="hdr-logo">FLORA</div>
+    <div class="hdr-r">
+      <div style="font-size:.72rem;color:var(--text3)" id="hdr-name"></div>
+      <div class="hdr-btn" onclick="openSettings()">⚙️</div>
+      <div class="hdr-btn" onclick="doLogout()">↩</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <div class="view on" id="v-home">
+      <div style="margin-bottom:20px">
+        <div class="greet-time" id="g-time">Good morning</div>
+        <div class="greet-name" id="g-name">Loading…</div>
+        <div class="greet-phase"><div class="phase-pip" id="g-pip" style="background:var(--rose)"></div><span id="g-phase">Loading…</span></div>
+      </div>
+      <div class="streak">🔥 <span id="g-streak">0</span> day streak</div>
+
+      <div class="card">
+        <div class="sh"><div><div class="st">Today</div><div style="font-size:.75rem;color:var(--text3)" id="g-date"></div></div><div class="sa" onclick="openModal('m-meal')">+ Log Food</div></div>
+        <div class="ring-wrap">
+          <svg width="92" height="92" class="ring-svg"><circle class="ring-bg" cx="46" cy="46" r="38"/><circle class="ring-prog" id="cal-ring" cx="46" cy="46" r="38" stroke-dasharray="238.76" stroke-dashoffset="238.76"/></svg>
+          <div><div class="ring-val" id="r-cals">0</div><div class="ring-of">of <span id="r-tgt">1,450</span> kcal</div><div style="font-size:.72rem;color:var(--sage);font-weight:500;margin-top:3px" id="r-left">1,450 remaining</div></div>
+        </div>
+        <div class="macro-row">
+          <div class="macro-pill"><div class="mv" id="m-p">0g</div><div class="ml">Protein</div><div class="mbar"><div class="mfill" id="pb-p" style="width:0%;background:var(--accent)"></div></div></div>
+          <div class="macro-pill"><div class="mv" id="m-f">0g</div><div class="ml">Fiber</div><div class="mbar"><div class="mfill" id="pb-f" style="width:0%;background:var(--sage)"></div></div></div>
+          <div class="macro-pill"><div class="mv" id="m-o">0g</div><div class="ml">Omega-3</div><div class="mbar"><div class="mfill" id="pb-o" style="width:0%;background:var(--blue)"></div></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sh"><div class="st">Hydration</div><div style="font-size:.8rem;font-weight:500"><span id="w-n">0</span>/<span id="w-tgt">11</span> glasses</div></div>
+        <div class="w-glasses" id="w-glasses"></div>
+        <div class="pbar"><div class="pb" id="w-bar" style="width:0%;background:var(--blue)"></div></div>
+      </div>
+
+      <div class="card card-sage">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:.85rem;font-weight:600;color:var(--sage)">🍵 Spearmint Tea</div><div style="font-size:.72rem;color:var(--text3);margin-top:2px">2 cups daily · anti-androgen for PCOS</div></div>
+          <div style="display:flex;gap:8px"><div class="wg" id="tea-0" onclick="toggleTea(0)">🍵</div><div class="wg" id="tea-1" onclick="toggleTea(1)">🍵</div></div>
+        </div>
+      </div>
+
+      <div class="sh"><div class="st">Meals</div><div class="sa" onclick="openModal('m-meal')">+ Add</div></div>
+      <div id="home-meals"></div>
+
+      <div class="sh" style="margin-top:6px"><div class="st">Supplements</div><div style="font-size:.78rem;font-weight:500"><span id="supp-done">0</span>/<span id="supp-tot">0</span> today</div></div>
+      <div class="card"><div id="supp-list"></div></div>
+
+      <div class="sh"><div class="st">Daily Practices</div></div>
+      <div class="card"><div id="prac-list"></div></div>
+    </div>
+
+    <!-- FOOD -->
+    <div class="view" id="v-food">
+      <div class="sh"><div class="st">Food Tracker</div><div class="sa" onclick="openModal('m-meal')">+ Log</div></div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div><div class="st">Daily Total</div><div style="font-size:.75rem;color:var(--text3)">PCOS-optimized · no grains</div></div>
+          <div style="text-align:right"><div style="font-family:var(--fd);font-size:1.8rem;font-weight:300" id="fd-total">0</div><div style="font-size:.72rem;color:var(--text3)">of <span id="fd-tgt">1,450</span> kcal</div></div>
+        </div>
+        <div class="pbar"><div class="pb" id="fd-bar" style="width:0%;background:linear-gradient(90deg,var(--accent),var(--gold))"></div></div>
+        <div style="font-size:.75rem;color:var(--sage);font-weight:500;margin-top:6px" id="fd-rem">1,450 remaining</div>
+        <div class="macro-row">
+          <div class="macro-pill"><div class="mv" id="fd-p">0g</div><div class="ml">Protein</div><div style="font-size:.62rem;color:var(--text3)">goal: <span id="fd-pg">110g</span></div></div>
+          <div class="macro-pill"><div class="mv" id="fd-c">0g</div><div class="ml">Carbs</div><div style="font-size:.62rem;color:var(--text3)">no grains</div></div>
+          <div class="macro-pill"><div class="mv" id="fd-f">0g</div><div class="ml">Fat</div><div style="font-size:.62rem;color:var(--text3)">healthy fats</div></div>
+        </div>
+      </div>
+      <div class="sh"><div class="st">Logged</div></div><div id="fd-logged"></div>
+      <div class="sh" style="margin-top:6px"><div class="st">Still to Eat</div></div><div id="fd-pending"></div>
+    </div>
+
+    <!-- GYM -->
+    <div class="view" id="v-gym">
+      <div class="sh"><div class="st">Training</div><div class="sa" onclick="openModal('m-build-wo')">Build</div></div>
+      <div class="week-row" id="week-row"></div>
+      <div class="card">
+        <div class="sh" style="margin-top:0"><div><div class="st" id="wo-title">Today</div><div style="font-size:.75rem;color:var(--text3)" id="wo-sub"></div></div></div>
+        <div id="ex-list"></div>
+        <button class="btn" onclick="startWorkout()" id="start-wo-btn" style="margin-top:14px">Start Workout 💪</button>
+      </div>
+      <div class="sh"><div class="st">This Month</div></div>
+      <div class="stats-2">
+        <div class="sb"><span style="font-size:1.4rem;display:block;margin-bottom:5px">🏋️</span><span class="sv" id="st-w">0</span><span class="slbl">Workouts</span></div>
+        <div class="sb"><span style="font-size:1.4rem;display:block;margin-bottom:5px">🔥</span><span class="sv" id="st-str">0</span><span class="slbl">Day Streak</span></div>
+        <div class="sb"><span style="font-size:1.4rem;display:block;margin-bottom:5px">⚡</span><span class="sv" id="st-sets">0</span><span class="slbl">Total Sets</span></div>
+        <div class="sb"><span style="font-size:1.4rem;display:block;margin-bottom:5px">⏱️</span><span class="sv">45m</span><span class="slbl">Avg Duration</span></div>
+      </div>
+      <div class="sh"><div class="st">Body Metrics</div><div class="sa" onclick="openModal('m-metrics')">+ Log</div></div>
+      <div class="card"><div id="body-metrics"></div></div>
+    </div>
+
+    <!-- PANTRY -->
+    <div class="view" id="v-pantry">
+      <div class="sh"><div class="st">Pantry & Shopping</div><div class="sa" onclick="openModal('m-scan')">📷 Scan</div></div>
+      <div class="card card-gold" id="low-card" style="display:none"><div style="font-size:.78rem;font-weight:700;color:var(--gold);margin-bottom:10px">⚠ Running Low</div><div id="low-list"></div></div>
+      <div class="sh"><div class="st">Costco List</div><div class="sa" onclick="checkAll()">Check All</div></div>
+      <div class="card"><div id="shop-list"></div></div>
+      <div class="sh" style="margin-top:4px"><div class="st">Pantry Inventory</div><div class="sa" onclick="openModal('m-add-item')">+ Add</div></div>
+      <div class="card"><div id="inv-list"></div></div>
+    </div>
+
+    <!-- RECIPES -->
+    <div class="view" id="v-recipes">
+      <div class="sh"><div class="st">Recipes</div></div>
+      <div class="filter-row">
+        <div class="fb-btn on" data-f="all" onclick="filterRec('all',this)">All</div>
+        <div class="fb-btn" data-f="breakfast" onclick="filterRec('breakfast',this)">Breakfast</div>
+        <div class="fb-btn" data-f="lunch" onclick="filterRec('lunch',this)">Lunch</div>
+        <div class="fb-btn" data-f="dinner" onclick="filterRec('dinner',this)">Dinner</div>
+        <div class="fb-btn" data-f="snack" onclick="filterRec('snack',this)">Snacks</div>
+        <div class="fb-btn" data-f="prep" onclick="filterRec('prep',this)">Meal Prep</div>
+      </div>
+      <div id="recipe-list"></div>
+    </div>
+
+    <!-- PLAN -->
+    <div class="view" id="v-plan">
+      <div class="sh"><div class="st">Your Plan</div><span style="font-size:.62rem;font-weight:700;padding:3px 9px;border-radius:20px;background:#f0ece6;color:var(--accent);border:1px solid var(--border2)">AI Powered</span></div>
+      <div class="card-ai">
+        <div class="ai-badge">✦ FLORA AI</div>
+        <div style="font-family:var(--fd);font-size:1.1rem;font-weight:400;margin-bottom:10px">Your Personalized Plan</div>
+        <div class="ai-plan-text" id="ai-plan-text">Tap below to generate your plan.</div>
+        <div id="ai-load-area"></div>
+        <button class="btn" onclick="genPlan()" style="margin-top:14px">Generate Monthly Plan ✦</button>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:8px;text-align:center">Requires Claude API key · add in ⚙️ Settings</div>
+      </div>
+      <div class="sh"><div class="st">Cycle Tracker</div><div class="sa" onclick="openModal('m-labs')">Log Labs</div></div>
+      <div class="card">
+        <div style="font-size:.8rem;color:var(--text2)" id="cyc-detail">Loading…</div>
+        <div class="cyc-bar" id="cyc-bar"></div>
+        <div style="display:flex;font-size:.6rem;color:var(--text4);font-weight:600;text-transform:uppercase;letter-spacing:.06em">
+          <span style="flex:5">Menstrual</span><span style="flex:8">Follicular</span><span style="flex:2">Ovulation</span><span style="flex:13">Luteal</span>
+        </div>
+        <div style="margin-top:16px"><div class="fl" style="margin-bottom:8px">Phase Guidance</div><div id="phase-guide" style="font-size:.8rem;color:var(--text2);line-height:1.7"></div></div>
+      </div>
+      <div class="sh"><div class="st">Lab Results</div></div>
+      <div class="card"><div id="lab-list"></div></div>
+      <div class="sh"><div class="st">Health Insights</div></div>
+      <div class="card"><div id="ins-list"></div></div>
+    </div>
+  </main>
+
+  <nav>
+    <div class="ni on" id="ni-home" onclick="showView('home')"><div class="ni-ico">🏠</div><div class="ni-lbl">Home</div></div>
+    <div class="ni" id="ni-food" onclick="showView('food')"><div class="ni-ico">🥗</div><div class="ni-lbl">Food</div></div>
+    <div class="ni" id="ni-gym" onclick="showView('gym')"><div class="ni-ico">💪</div><div class="ni-lbl">Gym</div></div>
+    <div class="ni" id="ni-pantry" onclick="showView('pantry')"><div class="ni-ico">🛒</div><div class="ni-lbl">Pantry</div></div>
+    <div class="ni" id="ni-recipes" onclick="showView('recipes')"><div class="ni-ico">📖</div><div class="ni-lbl">Recipes</div></div>
+    <div class="ni" id="ni-plan" onclick="showView('plan')"><div class="ni-ico">✦</div><div class="ni-lbl">Plan</div></div>
+  </nav>
+</div>
+
+<!-- REST TIMER -->
+<div class="rest-timer hide" id="rest-timer">
+  <div><div style="font-size:.72rem;opacity:.65">Rest Timer</div><div style="font-family:var(--fd);font-size:1.8rem;font-weight:300" id="timer-n">1:30</div></div>
+  <button class="btn btn-sm btn-out" onclick="stopTimer()" style="color:var(--cream);background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.2)">Skip</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast hide" id="toast">
+  <span id="t-ico">🌸</span>
+  <div style="flex:1"><div style="font-size:.83rem;font-weight:600" id="t-title"></div><div style="font-size:.73rem;opacity:.75" id="t-msg"></div></div>
+  <span style="opacity:.6;cursor:pointer;font-size:.8rem" onclick="closeToast()">✕</span>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg hide" id="m-meal" onclick="if(event.target===this)closeModal('m-meal')">
+  <div class="modal"><div class="mh"></div><div class="mtitle">Log a Meal</div>
+    <div class="fg"><label class="fl">Meal Type</label><select class="fi" id="lm-type"><option>Breakfast</option><option>Pre-Workout</option><option>Lunch</option><option>Post-Workout</option><option>Dinner</option><option>Snack</option></select></div>
+    <div class="fg"><label class="fl">Food Name</label><input class="fi" id="lm-name" placeholder="e.g. PCOS Power Bowl with Salmon"/></div>
+    <div class="fr"><div class="fg"><label class="fl">Calories</label><input class="fi" id="lm-cals" type="number" placeholder="420"/></div><div class="fg"><label class="fl">Protein (g)</label><input class="fi" id="lm-pro" type="number" placeholder="38"/></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Carbs (g)</label><input class="fi" id="lm-carbs" type="number" placeholder="18"/></div><div class="fg"><label class="fl">Fat (g)</label><input class="fi" id="lm-fat" type="number" placeholder="16"/></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Fiber (g)</label><input class="fi" id="lm-fiber" type="number" placeholder="8"/></div><div class="fg"><label class="fl">Omega-3 (g)</label><input class="fi" id="lm-omega" type="number" placeholder="1.5"/></div></div>
+    <button class="btn" onclick="logMeal()">Log Meal ✓</button>
+  </div>
+</div>
+
+<div class="modal-bg hide" id="m-add-item" onclick="if(event.target===this)closeModal('m-add-item')">
+  <div class="modal"><div class="mh"></div><div class="mtitle">Add Pantry Item</div>
+    <div class="fg"><label class="fl">Item Name</label><input class="fi" id="ai-name" placeholder="e.g. Wild Sockeye Salmon"/></div>
+    <div class="fg"><label class="fl">Category</label><select class="fi" id="ai-cat"><option>Protein</option><option>Vegetables</option><option>Legumes</option><option>Nuts & Seeds</option><option>Dairy</option><option>Oils</option><option>Pantry</option><option>Supplements</option></select></div>
+    <div class="fr"><div class="fg"><label class="fl">Quantity</label><input class="fi" id="ai-qty" type="number" placeholder="2"/></div><div class="fg"><label class="fl">Unit</label><select class="fi" id="ai-unit"><option>lbs</option><option>oz</option><option>bags</option><option>cans</option><option>bottles</option><option>cartons</option><option>count</option></select></div></div>
+    <div class="fg"><label class="fl">Days of Supply</label><input class="fi" id="ai-days" type="number" placeholder="14"/></div>
+    <button class="btn" onclick="addInv()">Add to Pantry ✓</button>
+  </div>
+</div>
+
+<div class="modal-bg hide" id="m-scan" onclick="if(event.target===this){stopScan();closeModal('m-scan')}">
+  <div class="modal"><div class="mh"></div><div class="mtitle">Scan Barcode</div>
+    <div id="scanner-container"><video id="scan-vid" style="width:100%;display:block;border-radius:14px" playsinline autoplay muted></video><canvas id="scan-canvas" style="display:none"></canvas><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none"><div style="width:220px;height:120px;border:2px solid rgba(255,255,255,.8);border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.45)"></div></div></div>
+    <div id="scan-start"><div class="scan-area" onclick="startScan()"><span style="font-size:2.8rem;display:block;margin-bottom:8px">📷</span><div style="font-size:.85rem;color:var(--text3)">Tap to activate camera</div></div></div>
+    <div id="scan-status" style="text-align:center;font-size:.8rem;color:var(--text3);margin-bottom:12px;min-height:20px"></div>
+    <div id="scan-result" style="display:none" class="card card-sage"><div style="font-size:.75rem;font-weight:700;color:var(--sage);margin-bottom:8px">✓ Product Found</div><div style="font-size:1rem;font-weight:600" id="sr-name"></div><div style="font-size:.8rem;color:var(--text3);margin-top:3px" id="sr-brand"></div><div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-sm" onclick="scanToPantry()" style="flex:1">Add to Pantry</button><button class="btn btn-sm btn-sage" onclick="scanToMeal()" style="flex:1">Log as Meal</button></div></div>
+    <div style="font-size:.78rem;color:var(--text3);text-align:center;margin:12px 0 8px">— or enter barcode manually —</div>
+    <div style="display:flex;gap:8px"><input class="fi" id="bc-input" placeholder="Enter barcode number..." style="flex:1"/><button class="btn" onclick="lookupBC()" style="width:44px;padding:0;font-size:1rem">🔍</button></div>
+    <button class="btn btn-out" onclick="stopScan();closeModal('m-scan')" style="margin-top:12px">Close</button>
+  </div>
+</div>
+
+<div class="modal-bg hide" id="m-metrics" onclick="if(event.target===this)closeModal('m-metrics')">
+  <div class="modal"><div class="mh"></div><div class="mtitle">Log Body Metrics</div>
+    <div class="fr"><div class="fg"><label class="fl">Weight (lbs)</label><input class="fi" id="mt-w" type="number" placeholder="130"/></div><div class="fg"><label class="fl">Body Fat %</label><input class="fi" id="mt-bf" type="number" placeholder="24"/></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Waist (in)</label><input class="fi" id="mt-wa" type="number" placeholder="27"/></div><div class="fg"><label class="fl">Hip (in)</label><input class="fi" id="mt-hi" type="number" placeholder="37"/></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Energy (1-10)</label><input class="fi" id="mt-en" type="number" min="1" max="10" placeholder="7"/></div><div class="fg"><label class="fl">Mood (1-10)</label><input class="fi" id="mt-mo" type="number" min="1" max="10" placeholder="7"/></div></div>
+    <div class="fg"><label class="fl">Notes</label><input class="fi" id="mt-no" placeholder="How are you feeling?"/></div>
+    <button class="btn" onclick="logMetrics()">Save Metrics ✓</button>
+  </div>
+</div>
+
+<div class="modal-bg hide" id="m-labs" onclick="if(event.target===this)closeModal('m-labs')">
+  <div class="modal"><div class="mh"></div><div class="mtitle">Log Lab Results</div>
+    <div class="fg"><label class="fl">Test Date</label><input class="fi" id="lb-dt" type="date"/></div>
+    <div class="fr"><div class="fg"><label class="fl">Progesterone (ng/mL)</label><input class="fi" id="lb-pr" type="number" placeholder="15.0"/></div><div class="fg"><label class="fl">Estradiol (pg/mL)</label><input class="fi" id="lb-es" type="number" placeholder="134"/></div></div>
+    <div class="fr"><div class="fg"><label class="fl">TSH</label><input class="fi" id="lb-ts" type="number" placeholder="2.75"/></div><div class="fg"><label class="fl">IR Score</label><input class="fi" id="lb-ir" type="number" placeholder="4"/></div></div>
+    <div class="fr"><div class="fg"><label class="fl">hsCRP</label><input class="fi" id="lb-cr" type="number" placeholder="0.6"/></div><div class="fg"><label class="fl">DHEA-S</label><input class="fi" id="lb-dh" type="number" placeholder="787"/></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Free Testosterone</label><input class="fi" id="lb-ft" placeholder="pending"/></div><div class="fg"><label class="fl">SHBG</label><input class="fi" id="lb-sh" placeholder="pending"/></div></div>
+    <button class="btn" onclick="logLabs()">Save Labs ✓</button>
+  </div>
+</div>
+
+<div class="modal-bg hide" id="m-build-wo" onclick="if(event.target===this)closeModal('m-build-wo')">
+  <div class="modal"><div class="mh"></div><div class="mtitle">Build Workout</div>
+    <div class="fg"><label class="fl">Workout Name</label><input class="fi" id="wo-n" placeholder="e.g. Lower Body Power"/></div>
+    <div class="fg"><label class="fl">Target Muscles</label>
+      <div class="muscle-grid">
+        <div class="mb" onclick="togMuscle(this)"><span class="mico">🦵</span>Quads</div>
+        <div class="mb" onclick="togMuscle(this)"><span class="mico">🍑</span>Glutes</div>
+        <div class="mb" onclick="togMuscle(this)"><span class="mico">🔙</span>Hamstrings</div>
+        <div class="mb" onclick="togMuscle(this)"><span class="mico">💪</span>Biceps</div>
+        <div class="mb" onclick="togMuscle(this)"><span class="mico">🏋️</span>Chest</div>
+        <div class="mb" onclick="togMuscle(this)"><span class="mico">🔺</span>Shoulders</div>
+        <div class="mb" onclick="togMuscle(this)"><span class="mico">🏃</span>Back</div>
+        <div class="mb" onclick="togMuscle(this)"><span class="mico">⭕</span>Core</div>
+        <div class="mb" onclick="togMuscle(this)"><span class="mico">🦶</span>Calves</div>
+      </div>
+    </div>
+    <div class="fr"><div class="fg"><label class="fl">Sets</label><input class="fi" id="wo-sets" type="number" value="4"/></div><div class="fg"><label class="fl">Reps</label><input class="fi" id="wo-reps" value="8-12"/></div></div>
+    <div class="fg"><label class="fl">Rest (seconds)</label><input class="fi" id="wo-rest" type="number" value="90"/></div>
+    <button class="btn btn-sage" onclick="buildWo()">Build Workout ✦</button>
+  </div>
+</div>
+
+<div class="modal-bg hide" id="m-recipe" onclick="if(event.target===this)closeModal('m-recipe')">
+  <div class="modal" id="m-recipe-content"></div>
+</div>
+
+<div class="modal-bg hide" id="m-settings" onclick="if(event.target===this)closeModal('m-settings')">
+  <div class="modal"><div class="mh"></div><div class="mtitle">Settings</div>
+    <div class="fg"><label class="fl">Your Name</label><input class="fi" id="set-n"/></div>
+    <div class="fr"><div class="fg"><label class="fl">Weight (lbs)</label><input class="fi" id="set-w" type="number"/></div><div class="fg"><label class="fl">Calorie Target</label><input class="fi" id="set-c" type="number"/></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Protein Target (g)</label><input class="fi" id="set-p" type="number"/></div><div class="fg"><label class="fl">Water (glasses)</label><input class="fi" id="set-wa" type="number"/></div></div>
+    <div class="fg"><label class="fl">Period Start Date</label><input class="fi" id="set-per" type="date"/></div>
+    <div class="fg"><label class="fl">Workout Time</label><select class="fi" id="set-wt"><option value="14:00">2:00 PM</option><option value="15:00">3:00 PM</option><option value="06:00">6:00 AM</option><option value="07:00">7:00 AM</option><option value="17:00">5:00 PM</option><option value="18:00">6:00 PM</option></select></div>
+    <div class="fg"><label class="fl">Claude API Key (for AI plans)</label><input class="fi" id="set-api" type="password" placeholder="sk-ant-..."/></div>
+    <button class="btn" onclick="saveSettings()" style="margin-bottom:10px">Save Settings ✓</button>
+    <button class="btn btn-out" onclick="doLogout()">Log Out</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// FLORA v3 — Pure vanilla JS, no async/await, Safari-safe
+// ============================================================
+
+// ── STORAGE ──────────────────────────────────────────────────
+function lsGet(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : (d !== undefined ? d : null); } catch(e) { return d !== undefined ? d : null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+function lsDel(k) { try { localStorage.removeItem(k); } catch(e) {} }
+
+// ── STATE ─────────────────────────────────────────────────────
+var USER = null;
+var PROFILE = {};
+var DAILY = { water:0, tea:[false,false], cals:0, protein:0, fiber:0, omega:0, carbs:0, fat:0, meals:[], suppChecked:{}, pracChecked:{}, date:'' };
+var METRICS = [];
+var LABS = [];
+var INVENTORY = [];
+var SHOPLIST = {};
+var AI_PLAN = '';
+var STREAK = 7;
+var WORKOUTS = [];
+
+// ── AUTH ──────────────────────────────────────────────────────
+function switchTab(tab) {
+  var tabs = ['login','signup','forgot'];
+  for (var i = 0; i < tabs.length; i++) {
+    var t = tabs[i];
+    var tabEl = document.getElementById('tab-' + t);
+    var panelEl = document.getElementById('panel-' + t);
+    if (tabEl) tabEl.className = 'auth-tab' + (t === tab ? ' on' : '');
+    if (panelEl) panelEl.className = 'auth-panel' + (t === tab ? ' on' : '');
+  }
+  clearErr();
+}
+
+function clearErr() {
+  var ids = ['login-err','signup-err','forgot-err'];
+  for (var i = 0; i < ids.length; i++) {
+    var e = document.getElementById(ids[i]);
+    if (e) { e.style.display = 'none'; e.textContent = ''; }
+  }
+}
+
+function showErr(id, msg) {
+  var e = document.getElementById(id);
+  if (e) { e.textContent = msg; e.style.display = 'block'; }
+}
+
+function doLogin() {
+  clearErr();
+  var email = val('l-email').trim().toLowerCase();
+  var pass = val('l-pass');
+  if (!email || !pass) { showErr('login-err', 'Please enter your email and password.'); return; }
+  var btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Logging in…';
+  var acct = lsGet('acct_' + email);
+  if (!acct) { showErr('login-err', 'No account found. Please sign up first.'); btn.disabled = false; btn.textContent = 'Log In'; return; }
+  if (acct.pass !== btoa(pass)) { showErr('login-err', 'Incorrect password.'); btn.disabled = false; btn.textContent = 'Log In'; return; }
+  btn.disabled = false; btn.textContent = 'Log In';
+  onLogin(email, acct.name, acct.profile);
+}
+
+function doSignup() {
+  clearErr();
+  var name = val('s-name').trim();
+  var email = val('s-email').trim().toLowerCase();
+  var pass = val('s-pass');
+  if (!name) { showErr('signup-err', 'Please enter your name.'); return; }
+  if (!email) { showErr('signup-err', 'Please enter your email.'); return; }
+  if (!pass || pass.length < 8) { showErr('signup-err', 'Password must be at least 8 characters.'); return; }
+  if (lsGet('acct_' + email)) { showErr('signup-err', 'An account with this email already exists.'); return; }
+  var btn = document.getElementById('signup-btn');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  lsSet('acct_' + email, { name: name, pass: btoa(pass), email: email });
+  lsSet('session', { email: email, name: name });
+  btn.disabled = false; btn.textContent = 'Create Account';
+  onLogin(email, name, null);
+}
+
+function doForgot() {
+  toast('📧', 'Coming soon', 'Password reset requires backend setup. Contact support.');
+}
+
+function onLogin(email, name, savedProfile) {
+  USER = { email: email, name: name };
+  lsSet('session', USER);
+  if (savedProfile) {
+    PROFILE = savedProfile;
+  } else {
+    // First time - use pre-loaded profile if exists, else start questionnaire
+    var existing = lsGet('profile_' + email);
+    if (existing) {
+      PROFILE = existing;
+      launchApp();
+    } else {
+      // Check if this needs questionnaire or can use preloaded data
+      showScreen('s-quest');
+      startQuest();
+    }
+    return;
+  }
+  launchApp();
+}
+
+function doLogout() {
+  lsDel('session');
+  USER = null; PROFILE = {};
+  showScreen('s-auth');
+  closeModal('m-settings');
+}
+
+// ── SCREENS ───────────────────────────────────────────────────
+function showScreen(id) {
+  var screens = ['s-auth','s-quest','s-ai','s-app'];
+  for (var i = 0; i < screens.length; i++) {
+    var el = document.getElementById(screens[i]);
+    if (el) el.className = 'screen' + (screens[i] === id ? ' on' : '');
+  }
+  window.scrollTo(0,0);
+}
+
+// ── QUESTIONNAIRE ─────────────────────────────────────────────
+var Q_STEPS = [
+  { id:'basics', title:'The basics', sub:'Help FLORA understand your body and goals.', type:'inputs', fields:[
+    {id:'q-name',label:'Your Name',type:'text',ph:'Your name'},
+    {id:'q-age',label:'Age',type:'number',ph:'33'},
+    {id:'q-height',label:'Height',type:'text',ph:"5'5"},
+    {id:'q-weight',label:'Current Weight (lbs)',type:'number',ph:'130'},
+    {id:'q-gw',label:'Goal Weight (lbs)',type:'number',ph:'125'},
+    {id:'q-period',label:'First day of last period',type:'date',ph:''},
+  ]},
+  { id:'goal', title:'Your main goal', sub:'Pick what matters most right now.', type:'chips1', opts:['Body recomposition (build muscle + lose fat)','Weight loss','Muscle building','Hormone balance','Gut health','More energy','Better sleep','Manage a health condition','General wellness'] },
+  { id:'conditions', title:'Health conditions', sub:'Select all that apply — the most important question for your plan.', type:'chipsM', opts:['PCOS','Lean PCOS','Endometriosis',"Hashimoto's thyroiditis",'Hypothyroidism','Hyperthyroidism','Type 2 Diabetes','Pre-diabetes','Insulin resistance','Fatty liver (NAFLD)','Celiac disease','Crohn\'s / IBD','IBS','Lupus','Rheumatoid arthritis','Fibromyalgia','Perimenopause','Menopause','Post-menopause','Osteoporosis','Osteopenia','High blood pressure','High cholesterol','POTS','Chronic fatigue syndrome','None of the above'] },
+  { id:'symptoms', title:'Current symptoms', sub:'Everything you\'re experiencing — even if undiagnosed.', type:'chipsM', opts:['Always feeling cold','Always feeling hot / night sweats','Irregular periods','Heavy periods','Melasma / skin pigmentation','Hair thinning','Unwanted hair growth','Acne','Bloating','Constipation','Brain fog','Fatigue / low energy','Mood swings','Anxiety','Crying easily','Poor sleep','Joint pain','Weight gain (midsection)','Difficulty losing weight','Low libido','None of these'] },
+  { id:'meds', title:'Medications & supplements', sub:'Be specific — this shapes your entire protocol.', type:'inputs', fields:[
+    {id:'q-meds',label:'Prescription medications',type:'textarea',ph:'e.g. Metformin 500mg twice daily, Semaglutide 0.5mg weekly…'},
+    {id:'q-supps',label:'Current supplements (if any)',type:'textarea',ph:'e.g. Vitamin D, Magnesium…'},
+  ]},
+  { id:'diet', title:'Dietary preferences', sub:'FLORA builds your meal plan around these.', type:'chipsM', opts:['No restrictions','No gluten','No dairy','No grains or pasta','No processed sugar','Vegetarian','Vegan','Pescatarian','Keto / low carb','Paleo','Mediterranean','Intermittent fasting','Nut allergy','Shellfish allergy','Food sensitivities (IBS)'] },
+  { id:'exercise', title:'Your fitness profile', sub:'Honest answers give you a better plan.', type:'inputs', fields:[
+    {id:'q-fit',label:'Current fitness level',type:'select',opts:['Beginner — rarely exercise','Moderate — 1-2x/week','Active — 3-4x/week','Very active — 5+ days/week']},
+    {id:'q-extype',label:'Exercise you enjoy',type:'text',ph:'e.g. weight training, walking, yoga, swimming'},
+    {id:'q-wtime',label:'Preferred workout time',type:'select',opts:['Morning (6-9am)','Midday (10am-1pm)','Afternoon (2-4pm)','Evening (5-8pm)','Varies']},
+    {id:'q-exgoal',label:'Exercise goal',type:'select',opts:['Build muscle','Lose fat','Body recomposition','Improve endurance','Reduce stress','Maintain fitness','Low impact / rehabilitation']},
+  ]},
+  { id:'lifestyle', title:'Sleep & stress', sub:'These affect hormones more than most people realize.', type:'inputs', fields:[
+    {id:'q-sleep',label:'Average hours of sleep',type:'select',opts:['Less than 5 hours','5-6 hours','6-7 hours','7-8 hours','8+ hours']},
+    {id:'q-stress',label:'Stress level (1-10)',type:'number',ph:'7'},
+    {id:'q-job',label:'Job type',type:'select',opts:['Desk job / sedentary','Active / on feet all day','Entrepreneur / high stress','Shift worker','Stay at home','Student','Retired']},
+    {id:'q-alc',label:'Alcohol',type:'select',opts:['None','Occasional (1-2x/month)','Social (1-2x/week)','Regular (3-5x/week)','Daily']},
+  ]},
+  { id:'labs', title:'Recent lab results', sub:'Optional but very helpful for your AI plan.', type:'inputs', fields:[
+    {id:'q-labs',label:'Lab results (if any)',type:'textarea',ph:'e.g. Progesterone 15.0 on Day 22, TSH 2.75, IR Score 4, hsCRP 0.6…'},
+  ]},
+  { id:'other', title:'Anything else?', sub:'Share anything that would help Claude understand your health better.', type:'inputs', fields:[
+    {id:'q-other',label:'Other health context',type:'textarea',ph:'Family history, past diagnoses, specific concerns, things you\'ve tried…'},
+  ]},
+];
+
+var qIdx = 0;
+var qAnswers = {};
+var qChips = {};
+
+function startQuest() {
+  qIdx = 0; qAnswers = {}; qChips = {};
+  renderQStep();
+}
+
+function renderQStep() {
+  var step = Q_STEPS[qIdx];
+  var pct = Math.round(((qIdx + 1) / Q_STEPS.length) * 100);
+  document.getElementById('q-prog-fill').style.width = pct + '%';
+  document.getElementById('q-lbl').textContent = 'Step ' + (qIdx + 1) + ' of ' + Q_STEPS.length;
+  document.getElementById('q-title').textContent = step.title;
+  document.getElementById('q-sub').textContent = step.sub;
+  document.getElementById('q-back').style.display = qIdx > 0 ? 'block' : 'none';
+
+  var body = document.getElementById('q-body');
+  body.innerHTML = '';
+
+  if (step.type === 'inputs') {
+    for (var i = 0; i < step.fields.length; i++) {
+      var f = step.fields[i];
+      var div = document.createElement('div');
+      div.className = 'fg';
+      var lbl = document.createElement('label');
+      lbl.className = 'fl';
+      lbl.textContent = f.label;
+      div.appendChild(lbl);
+      var inp;
+      if (f.type === 'textarea') {
+        inp = document.createElement('textarea');
+        inp.className = 'fi';
+        inp.placeholder = f.ph || '';
+        inp.rows = 3;
+      } else if (f.type === 'select') {
+        inp = document.createElement('select');
+        inp.className = 'fi';
+        for (var j = 0; j < f.opts.length; j++) {
+          var opt = document.createElement('option');
+          opt.value = opt.textContent = f.opts[j];
+          inp.appendChild(opt);
+        }
+      } else {
+        inp = document.createElement('input');
+        inp.className = 'fi';
+        inp.type = f.type;
+        inp.placeholder = f.ph || '';
+      }
+      inp.id = f.id;
+      if (qAnswers[f.id] !== undefined) inp.value = qAnswers[f.id];
+      div.appendChild(inp);
+      body.appendChild(div);
+    }
+  } else {
+    if (!qChips[step.id]) qChips[step.id] = step.type === 'chips1' ? '' : [];
+    var wrap = document.createElement('div');
+    wrap.className = 'chip-wrap';
+    for (var i = 0; i < step.opts.length; i++) {
+      (function(opt) {
+        var chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.textContent = opt;
+        var selected = step.type === 'chips1' ? (qChips[step.id] === opt) : (qChips[step.id].indexOf(opt) >= 0);
+        if (selected) chip.className += ' on';
+        chip.onclick = function() {
+          if (step.type === 'chips1') {
+            qChips[step.id] = opt;
+            var chips = wrap.querySelectorAll('.chip');
+            for (var k = 0; k < chips.length; k++) chips[k].className = 'chip';
+            chip.className = 'chip on';
+          } else {
+            var idx2 = qChips[step.id].indexOf(opt);
+            if (idx2 >= 0) { qChips[step.id].splice(idx2, 1); chip.className = 'chip'; }
+            else { qChips[step.id].push(opt); chip.className = 'chip on'; }
+          }
+        };
+        wrap.appendChild(chip);
+      })(step.opts[i]);
+    }
+    body.appendChild(wrap);
+  }
+  body.scrollTop = 0;
+}
+
+function qSaveStep() {
+  var step = Q_STEPS[qIdx];
+  if (step.type === 'inputs') {
+    for (var i = 0; i < step.fields.length; i++) {
+      var el = document.getElementById(step.fields[i].id);
+      if (el) qAnswers[step.fields[i].id] = el.value;
+    }
+  }
+}
+
+function qNext() {
+  qSaveStep();
+  if (qIdx < Q_STEPS.length - 1) { qIdx++; renderQStep(); }
+  else { submitQuest(); }
+}
+
+function qBack() { qSaveStep(); if (qIdx > 0) { qIdx--; renderQStep(); } }
+
+function submitQuest() {
+  showScreen('s-ai');
+  var msgs = ['Reading your health profile…','Analyzing your conditions…','Building your supplement protocol…','Designing your nutrition framework…','Crafting your exercise protocol…','Finalizing your plan…'];
+  var mi = 0;
+  var msgEl = document.getElementById('ai-msg');
+  var msgInterval = setInterval(function() {
+    mi++;
+    if (mi < msgs.length && msgEl) msgEl.textContent = msgs[mi];
+  }, 2000);
+
+  // Build profile from questionnaire answers
+  var newProfile = {
+    name: qAnswers['q-name'] || (USER ? USER.name : ''),
+    age: parseInt(qAnswers['q-age']) || null,
+    height: qAnswers['q-height'] || '',
+    weight: parseFloat(qAnswers['q-weight']) || null,
+    goalWeight: parseFloat(qAnswers['q-gw']) || null,
+    periodStart: qAnswers['q-period'] || '',
+    cycleLength: 28,
+    goal: qChips['goal'] || '',
+    conditions: qChips['conditions'] || [],
+    symptoms: qChips['symptoms'] || [],
+    meds: qAnswers['q-meds'] || '',
+    currentSupps: qAnswers['q-supps'] || '',
+    diet: qChips['diet'] || [],
+    fitnessLevel: qAnswers['q-fit'] || '',
+    exerciseTypes: qAnswers['q-extype'] || '',
+    workoutTime: qAnswers['q-wtime'] || 'Afternoon (2-4pm)',
+    exerciseGoal: qAnswers['q-exgoal'] || '',
+    sleep: qAnswers['q-sleep'] || '',
+    stress: qAnswers['q-stress'] || '',
+    job: qAnswers['q-job'] || '',
+    alcohol: qAnswers['q-alc'] || '',
+    labNotes: qAnswers['q-labs'] || '',
+    other: qAnswers['q-other'] || '',
+    calorieTarget: 1450,
+    proteinTarget: 110,
+    waterTarget: 11,
+    apiKey: '',
+    onboarded: true,
+  };
+
+  PROFILE = newProfile;
+  if (USER) { lsSet('profile_' + USER.email, PROFILE); }
+
+  // Try to generate AI plan
+  var apiKey = newProfile.apiKey || lsGet('flora_apikey') || '';
+  if (apiKey) {
+    genAIPlan(qAnswers, qChips, apiKey, function(plan) {
+      clearInterval(msgInterval);
+      AI_PLAN = plan;
+      lsSet('flora_plan_' + (USER ? USER.email : 'guest'), AI_PLAN);
+      launchApp();
+    }, function() {
+      clearInterval(msgInterval);
+      launchApp();
+    });
+  } else {
+    // No API key — use default plan after delay
+    setTimeout(function() {
+      clearInterval(msgInterval);
+      launchApp();
+    }, 3000);
+  }
+}
+
+// ── AI PLAN ───────────────────────────────────────────────────
+function genAIPlan(answers, chips, apiKey, onSuccess, onError) {
+  var conditions = (chips['conditions'] || []).join(', ');
+  var symptoms = (chips['symptoms'] || []).join(', ');
+  var prompt = 'You are FLORA, a compassionate functional medicine wellness AI. Generate a personalized wellness plan.\n\nUSER PROFILE:\nName: ' + (answers['q-name'] || 'User') + '\nAge: ' + (answers['q-age'] || '') + '\nHeight/Weight: ' + (answers['q-height'] || '') + ' / ' + (answers['q-weight'] || '') + ' lbs\nGoal weight: ' + (answers['q-gw'] || '') + ' lbs\n\nCONDITIONS: ' + conditions + '\nSYMPTOMS: ' + symptoms + '\nMEDICATIONS: ' + (answers['q-meds'] || 'None') + '\nDIET: ' + ((chips['diet'] || []).join(', ')) + '\nEXERCISE: ' + (answers['q-extype'] || '') + ' · ' + (answers['q-exgoal'] || '') + '\nSLEEP: ' + (answers['q-sleep'] || '') + '\nSTRESS: ' + (answers['q-stress'] || '') + '/10\nLAB NOTES: ' + (answers['q-labs'] || 'None provided') + '\nOTHER: ' + (answers['q-other'] || '') + '\n\nGenerate a plan with:\n1. YOUR WELLNESS PROFILE (2-3 sentences)\n2. TOP 3 PRIORITIES this month\n3. RECOMMENDED SUPPLEMENTS with doses\n4. NUTRITION FRAMEWORK\n5. EXERCISE PROTOCOL\n6. DAILY ROUTINE\n7. 30-DAY MILESTONES\n\nBe specific, warm, evidence-based. Under 600 words.';
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'https://api.anthropic.com/v1/messages', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('x-api-key', apiKey);
+  xhr.setRequestHeader('anthropic-version', '2023-06-01');
+  xhr.setRequestHeader('anthropic-dangerous-direct-browser-access', 'true');
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          if (data.content && data.content[0]) { onSuccess(data.content[0].text); }
+          else { onError(); }
+        } catch(e) { onError(); }
+      } else { onError(); }
+    }
+  };
+  xhr.onerror = onError;
+  xhr.send(JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }));
+}
+
+function genPlan() {
+  var apiKey = PROFILE.apiKey || lsGet('flora_apikey') || '';
+  if (!apiKey) { toast('⚙️', 'API Key Required', 'Add your Claude API key in Settings.'); openSettings(); return; }
+  var btn = document.querySelector('#v-plan .btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+  var loadArea = document.getElementById('ai-load-area');
+  if (loadArea) loadArea.innerHTML = '<div style="font-size:.82rem;color:var(--text2);padding:12px;background:var(--cream2);border-radius:10px;margin-bottom:12px">Claude is building your updated plan…</div>';
+
+  var day = cycleDay();
+  var phase = cyclePhase(day);
+  var latestLab = LABS.length ? LABS[0] : {};
+  var prompt = 'You are FLORA wellness AI. Generate a monthly plan update.\n\nUSER: ' + (PROFILE.name || 'User') + ', age ' + (PROFILE.age || '') + '\nCONDITIONS: ' + ((PROFILE.conditions || []).join(', ')) + '\nMEDS: ' + (PROFILE.meds || '') + '\nLATEST LABS: prog=' + (latestLab.prog || 'unknown') + ', tsh=' + (latestLab.tsh || 'unknown') + ', ir=' + (latestLab.ir || 'unknown') + ', crp=' + (latestLab.crp || 'unknown') + '\nCYCLE: Day ' + day + ' (' + phase.name + ' phase)\nGOAL: ' + (PROFILE.goal || '') + '\n\nGenerate focused monthly plan (250-300 words):\n1. TOP 3 PRIORITIES this month\n2. DIETARY FOCUS\n3. SUPPLEMENT ADJUSTMENTS\n4. EXERCISE MODIFICATIONS\n5. KEY METRICS TO WATCH';
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'https://api.anthropic.com/v1/messages', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('x-api-key', apiKey);
+  xhr.setRequestHeader('anthropic-version', '2023-06-01');
+  xhr.setRequestHeader('anthropic-dangerous-direct-browser-access', 'true');
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Generate Monthly Plan ✦'; }
+      if (loadArea) loadArea.innerHTML = '';
+      if (xhr.status === 200) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          if (data.content && data.content[0]) {
+            AI_PLAN = data.content[0].text;
+            lsSet('flora_plan_' + (USER ? USER.email : 'guest'), AI_PLAN);
+            setText('ai-plan-text', AI_PLAN);
+            toast('✦', 'Plan Updated!', 'Your new monthly plan is ready.');
+          }
+        } catch(e) { toast('⚠️', 'Error', 'Could not parse response.'); }
+      } else { toast('⚠️', 'API Error', 'Check your API key in Settings.'); }
+    }
+  };
+  xhr.onerror = function() {
+    if (btn) { btn.disabled = false; btn.textContent = 'Generate Monthly Plan ✦'; }
+    if (loadArea) loadArea.innerHTML = '';
+    toast('⚠️', 'Connection Error', 'Check your internet connection.');
+  };
+  xhr.send(JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] }));
+}
+
+// ── LAUNCH APP ────────────────────────────────────────────────
+function launchApp() {
+  // Load saved data
+  var email = USER ? USER.email : 'guest';
+  var savedProfile = lsGet('profile_' + email);
+  if (savedProfile) PROFILE = savedProfile;
+
+  var today = new Date().toDateString();
+  var savedDaily = lsGet('daily_' + email + '_' + today);
+  if (savedDaily) { DAILY = savedDaily; }
+  else { DAILY = { water:0, tea:[false,false], cals:0, protein:0, fiber:0, omega:0, carbs:0, fat:0, meals:[], suppChecked:{}, pracChecked:{}, date:today }; }
+
+  METRICS = lsGet('metrics_' + email, []);
+  LABS = lsGet('labs_' + email, DEFAULT_LABS);
+  INVENTORY = lsGet('inv_' + email, DEFAULT_INV);
+  SHOPLIST = lsGet('shop_' + email, {});
+  AI_PLAN = lsGet('flora_plan_' + email, DEFAULT_PLAN);
+  STREAK = lsGet('streak_' + email, 7);
+  WORKOUTS = lsGet('workouts_' + email, []);
+
+  // Load default inventory if empty
+  if (!INVENTORY || !INVENTORY.length) INVENTORY = JSON.parse(JSON.stringify(DEFAULT_INV));
+
+  setText('hdr-name', PROFILE.name || (USER ? USER.name : '') || '');
+  showScreen('s-app');
+  showView('home');
+
+  // Schedule notifications
+  if (window.Notification && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+    Notification.requestPermission();
+  }
+  scheduleNotifs();
+}
+
+function saveDaily() {
+  var email = USER ? USER.email : 'guest';
+  var today = new Date().toDateString();
+  DAILY.date = today;
+  lsSet('daily_' + email + '_' + today, DAILY);
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────
+function showView(name) {
+  var views = ['home','food','gym','pantry','recipes','plan'];
+  for (var i = 0; i < views.length; i++) {
+    var v = document.getElementById('v-' + views[i]);
+    var n = document.getElementById('ni-' + views[i]);
+    if (v) v.className = 'view' + (views[i] === name ? ' on' : '');
+    if (n) n.className = 'ni' + (views[i] === name ? ' on' : '');
+  }
+  var renders = { home:renderHome, food:renderFood, gym:renderGym, pantry:renderPantry, recipes:renderRecipes, plan:renderPlan };
+  if (renders[name]) renders[name]();
+  window.scrollTo(0,0);
+}
+
+function openModal(id) { var m = document.getElementById(id); if(m) m.className = 'modal-bg'; }
+function closeModal(id) { var m = document.getElementById(id); if(m) m.className = 'modal-bg hide'; }
+
+// ── TOAST ─────────────────────────────────────────────────────
+var toastTimer;
+function toast(ico, title, msg) {
+  setText('t-ico', ico); setText('t-title', title); setText('t-msg', msg);
+  var el = document.getElementById('toast');
+  if (el) el.className = 'toast';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(closeToast, 4000);
+}
+function closeToast() { var el = document.getElementById('toast'); if(el) el.className = 'toast hide'; }
+
+// ── HELPERS ───────────────────────────────────────────────────
+function val(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+function setText(id, v) { var e = document.getElementById(id); if(e) e.textContent = v; }
+function setW(id, w) { var e = document.getElementById(id); if(e) e.style.width = w + '%'; }
+function pct(v, max) { return Math.min(100, Math.round(v / max * 100)); }
+
+function cycleDay() {
+  if (!PROFILE.periodStart) return 22;
+  var start = new Date(PROFILE.periodStart);
+  var diff = Math.floor((new Date() - start) / 86400000);
+  var len = PROFILE.cycleLength || 28;
+  return (diff % len) + 1;
+}
+
+function cyclePhase(day) {
+  if (day <= 5) return { name:'Menstrual', pip:'#c4857a', cls:'cyc-m' };
+  if (day <= 13) return { name:'Follicular', pip:'#6b8fa8', cls:'cyc-f' };
+  if (day <= 15) return { name:'Ovulation', pip:'#7a8c72', cls:'cyc-o' };
+  return { name:'Luteal', pip:'#a882b4', cls:'cyc-l' };
+}
+
+function greetText() {
+  var h = new Date().getHours();
+  return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+}
+
+function fmtDate() { return new Date().toLocaleDateString('en-US', {weekday:'short',month:'short',day:'numeric'}); }
+
+// ── HOME RENDER ───────────────────────────────────────────────
+function renderHome() {
+  setText('g-time', greetText());
+  setText('g-name', (PROFILE.name || (USER ? USER.name : 'Friend')) + ' ✦');
+  setText('g-streak', STREAK);
+  setText('g-date', fmtDate());
+
+  var day = cycleDay();
+  var phase = cyclePhase(day);
+  setText('g-phase', phase.name + ' · Day ' + day);
+  var pip = document.getElementById('g-pip');
+  if (pip) pip.style.background = phase.pip;
+
+  var cals = DAILY.cals || 0;
+  var ct = PROFILE.calorieTarget || 1450;
+  var offset = 238.76 - (238.76 * pct(cals, ct) / 100);
+  var ring = document.getElementById('cal-ring');
+  if (ring) ring.style.strokeDashoffset = offset;
+  setText('r-cals', cals);
+  setText('r-tgt', ct.toLocaleString());
+  setText('r-left', Math.max(0, ct - cals).toLocaleString() + ' remaining');
+
+  var prot = DAILY.protein || 0;
+  var fib = DAILY.fiber || 0;
+  var om = DAILY.omega || 0;
+  setText('m-p', prot + 'g'); setW('pb-p', pct(prot, PROFILE.proteinTarget || 110));
+  setText('m-f', fib + 'g'); setW('pb-f', pct(fib, 30));
+  setText('m-o', om + 'g'); setW('pb-o', pct(om, 2));
+
+  var wt = PROFILE.waterTarget || 11;
+  var wc = DAILY.water || 0;
+  setText('w-n', wc); setText('w-tgt', wt);
+  setW('w-bar', pct(wc, wt));
+  var wg = document.getElementById('w-glasses');
+  if (wg) {
+    wg.innerHTML = '';
+    for (var i = 0; i < wt; i++) {
+      var d = document.createElement('div');
+      d.className = 'wg' + (i < wc ? ' on' : '');
+      d.textContent = i < wc ? '💧' : '○';
+      (function(idx) { d.onclick = function() { toggleWater(idx); }; })(i);
+      wg.appendChild(d);
+    }
+  }
+
+  // Tea
+  for (var i = 0; i < 2; i++) {
+    var t = document.getElementById('tea-' + i);
+    if (t) { t.className = 'wg' + (DAILY.tea[i] ? ' on' : ''); t.textContent = DAILY.tea[i] ? '🍵' : '○'; }
+  }
+
+  // Meals
+  var hm = document.getElementById('home-meals');
+  if (hm) {
+    var logged = [];
+    var meals = DAILY.meals || [];
+    for (var i = 0; i < meals.length; i++) { if (meals[i].logged) logged.push(meals[i]); }
+    var pending = [];
+    for (var i = 0; i < MEALS_PLAN.length; i++) {
+      var found = false;
+      for (var j = 0; j < logged.length; j++) { if (logged[j].type === MEALS_PLAN[i].type) { found = true; break; } }
+      if (!found) pending.push(MEALS_PLAN[i]);
+    }
+    var html = '';
+    for (var i = 0; i < logged.length; i++) {
+      var m = logged[i];
+      html += '<div class="mc"><div class="mi">' + (m.emoji || '🍽️') + '</div><div style="flex:1"><div class="mtype">' + m.type + '</div><div class="mname">' + m.name + '</div><div class="mmacros">' + m.protein + 'g protein · ' + (m.fiber || 0) + 'g fiber</div></div><div><div class="mcals">' + m.cals + '</div><div class="mstat logged">✓ Logged</div></div></div>';
+    }
+    for (var i = 0; i < Math.min(3, pending.length); i++) {
+      var m = pending[i];
+      html += '<div class="mc" onclick="preFill(\'' + m.type + '\')"><div class="mi">' + m.emoji + '</div><div style="flex:1"><div class="mtype">' + m.type + '</div><div class="mname">' + m.name + '</div><div class="mmacros">' + m.protein + 'g protein · ~' + m.cals + ' kcal</div></div><div><div class="mcals">~' + m.cals + '</div><div class="mstat pending">Tap to log</div></div></div>';
+    }
+    hm.innerHTML = html || '<div style="text-align:center;padding:20px;color:var(--text3);font-size:.85rem">Tap + Log Food to start tracking</div>';
+  }
+
+  // Supplements
+  var sl = document.getElementById('supp-list');
+  if (sl) {
+    var supps = getSupps();
+    var html = '', done = 0;
+    for (var i = 0; i < supps.length; i++) {
+      var s = supps[i];
+      var checked = !!(DAILY.suppChecked || {})[i];
+      if (checked) done++;
+      html += '<div class="si" onclick="toggleSupp(' + i + ')"><div class="sc' + (checked ? ' on' : '') + '">' + (checked ? '✓' : '') + '</div><div style="flex:1"><div class="sname">' + s.name + '</div><div class="sdose">' + s.dose + ' · ' + s.benefit + '</div></div><div class="stime">' + s.time + '</div></div>';
+    }
+    sl.innerHTML = html;
+    setText('supp-done', done);
+    setText('supp-tot', supps.length);
+  }
+
+  // Practices
+  var pl = document.getElementById('prac-list');
+  if (pl) {
+    var html = '';
+    for (var i = 0; i < PRACTICES.length; i++) {
+      var p = PRACTICES[i];
+      var done = !!(DAILY.pracChecked || {})[i];
+      html += '<div class="pi" onclick="togglePrac(' + i + ')"><div class="pico' + (done ? ' on' : '') + '">' + p.emoji + '</div><div style="flex:1"><div style="font-size:.85rem;font-weight:500">' + p.name + '</div><div style="font-size:.7rem;color:var(--text3);margin-top:1px">' + p.detail + '</div></div>' + (done ? '<div style="font-size:.65rem;font-weight:600;color:var(--sage);padding:2px 7px;background:#e8f0e4;border:1px solid #c8d8c0;border-radius:10px">Done ✓</div>' : '') + '</div>';
+    }
+    pl.innerHTML = html;
+  }
+}
+
+// ── FOOD RENDER ───────────────────────────────────────────────
+function renderFood() {
+  var cals = DAILY.cals || 0;
+  var ct = PROFILE.calorieTarget || 1450;
+  setText('fd-total', cals); setText('fd-tgt', ct);
+  setText('fd-rem', Math.max(0, ct - cals) + ' kcal remaining');
+  setW('fd-bar', pct(cals, ct));
+  setText('fd-p', (DAILY.protein || 0) + 'g');
+  setText('fd-pg', (PROFILE.proteinTarget || 110) + 'g');
+  setText('fd-c', (DAILY.carbs || 0) + 'g');
+  setText('fd-f', (DAILY.fat || 0) + 'g');
+
+  var logged = [], meals = DAILY.meals || [];
+  for (var i = 0; i < meals.length; i++) { if (meals[i].logged) logged.push(meals[i]); }
+
+  var fl = document.getElementById('fd-logged');
+  if (fl) {
+    if (!logged.length) { fl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text3);font-size:.85rem">No meals logged yet today</div>'; }
+    else {
+      var html = '';
+      for (var i = 0; i < logged.length; i++) {
+        var m = logged[i];
+        html += '<div class="mc"><div class="mi">' + (m.emoji || '🍽️') + '</div><div style="flex:1"><div class="mtype">' + m.type + ' · ' + (m.time || '') + '</div><div class="mname">' + m.name + '</div><div class="mmacros">' + m.protein + 'g P · ' + m.carbs + 'g C · ' + m.fat + 'g F</div></div><div><div class="mcals">' + m.cals + '</div><div class="mstat logged">✓</div></div></div>';
+      }
+      fl.innerHTML = html;
+    }
+  }
+
+  var fp = document.getElementById('fd-pending');
+  if (fp) {
+    var pending = [];
+    for (var i = 0; i < MEALS_PLAN.length; i++) {
+      var found = false;
+      for (var j = 0; j < logged.length; j++) { if (logged[j].type === MEALS_PLAN[i].type) { found = true; break; } }
+      if (!found) pending.push(MEALS_PLAN[i]);
+    }
+    if (!pending.length) { fp.innerHTML = '<div style="text-align:center;padding:20px;color:var(--sage);font-size:.85rem">All meals logged! Amazing day 🌸</div>'; }
+    else {
+      var html = '';
+      for (var i = 0; i < pending.length; i++) {
+        var m = pending[i];
+        html += '<div class="mc" onclick="preFill(\'' + m.type + '\')"><div class="mi">' + m.emoji + '</div><div style="flex:1"><div class="mtype">' + m.type + '</div><div class="mname">' + m.name + '</div><div class="mmacros">' + m.protein + 'g protein · ' + m.fiber + 'g fiber</div></div><div><div class="mcals">~' + m.cals + '</div><div class="mstat pending">Log →</div></div></div>';
+      }
+      fp.innerHTML = html;
+    }
+  }
+}
+
+// ── GYM RENDER ────────────────────────────────────────────────
+function renderGym() {
+  var now = new Date();
+  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var todayDow = days[now.getDay()];
+  var wr = document.getElementById('week-row');
+  if (wr) {
+    var ws = new Date(now); ws.setDate(now.getDate() - now.getDay());
+    var html = '';
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(ws); d.setDate(ws.getDate() + i);
+      var dow = days[d.getDay()];
+      var isToday = d.toDateString() === now.toDateString();
+      var wo = null;
+      for (var j = 0; j < WORKOUTS_DATA.length; j++) { if (WORKOUTS_DATA[j].day === dow) { wo = WORKOUTS_DATA[j]; break; } }
+      var dotCls = wo ? 'ddot' : (dow === 'Tue' || dow === 'Thu' || dow === 'Sat') ? 'ddot' : 'ddot';
+      var dotColor = wo ? 'var(--accent)' : (dow === 'Tue' || dow === 'Thu' || dow === 'Sat') ? 'var(--blue)' : 'transparent';
+      html += '<div class="dc' + (isToday ? ' today' : '') + '"><div class="dn">' + dow + '</div><div class="dd">' + d.getDate() + '</div><div class="' + dotCls + '" style="background:' + dotColor + '"></div></div>';
+    }
+    wr.innerHTML = html;
+  }
+
+  var wo = null;
+  for (var i = 0; i < WORKOUTS_DATA.length; i++) { if (WORKOUTS_DATA[i].day === todayDow) { wo = WORKOUTS_DATA[i]; break; } }
+  var wtTime = PROFILE.workoutTime || '14:00';
+  var wh = parseInt(wtTime.split(':')[0]);
+  var wm = wtTime.split(':')[1];
+  var ampm = wh >= 12 ? 'PM' : 'AM';
+  var wh12 = wh > 12 ? wh - 12 : wh;
+  var wtDisplay = wh12 + ':' + wm + ' ' + ampm;
+
+  if (wo) {
+    setText('wo-title', wo.name);
+    setText('wo-sub', wtDisplay + ' · ' + wo.note);
+    var el = document.getElementById('ex-list');
+    if (el) {
+      var html = '';
+      for (var i = 0; i < wo.exercises.length; i++) {
+        var ex = wo.exercises[i];
+        var chips = '';
+        for (var j = 0; j < ex.sets; j++) {
+          chips += '<div class="set-chip" onclick="this.className=\'set-chip done\';startRestTimer(' + ex.rest + ')">' + ex.reps + '</div>';
+        }
+        html += '<div class="ex-card"><div style="font-size:.88rem;font-weight:600">' + ex.name + '</div><div style="font-size:.7rem;color:var(--text3);margin-top:2px">' + ex.muscle + ' · ' + ex.sets + ' sets × ' + ex.reps + ' · ' + ex.rest + 's rest</div><div class="sets-row">' + chips + '</div></div>';
+      }
+      el.innerHTML = html;
+    }
+    var btn = document.getElementById('start-wo-btn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Start Workout 💪'; btn.style.background = ''; }
+  } else {
+    setText('wo-title', todayDow === 'Sun' ? 'Rest Day 🌿' : 'Active Recovery');
+    setText('wo-sub', 'Light cardio · walking · yoga · swimming');
+    var el = document.getElementById('ex-list');
+    if (el) el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:.85rem">Today is your ' + (todayDow === 'Sun' ? 'complete rest' : 'active recovery') + ' day.<br><br><em>Low cortisol activity supports hormone balance 🌸</em></div>';
+  }
+
+  var now2 = new Date();
+  var monthWo = [];
+  for (var i = 0; i < WORKOUTS.length; i++) {
+    var d2 = new Date(WORKOUTS[i].date);
+    if (d2.getMonth() === now2.getMonth() && d2.getFullYear() === now2.getFullYear()) monthWo.push(WORKOUTS[i]);
+  }
+  setText('st-w', monthWo.length);
+  setText('st-str', STREAK);
+  var totalSets = 0;
+  for (var i = 0; i < monthWo.length; i++) totalSets += (monthWo[i].sets || 0);
+  setText('st-sets', totalSets);
+
+  var bm = document.getElementById('body-metrics');
+  if (bm) {
+    if (!METRICS.length) { bm.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:.85rem">No metrics logged yet. Tap + Log to start.</div>'; }
+    else {
+      var latest = METRICS[0];
+      var prev = METRICS[1];
+      var chg = function(cur, old, unit) { if (!old || !cur) return ''; var d = (cur - old).toFixed(1); var cls = d < 0 ? 'color:var(--sage)' : 'color:var(--danger)'; return '<div style="font-size:.68rem;font-weight:600;' + cls + '">' + (d > 0 ? '+' : '') + d + unit + '</div>'; };
+      bm.innerHTML = '<div class="trend-row"><div class="trico">⚖️</div><div style="flex:1"><div style="font-size:.83rem;font-weight:500">Weight</div><div style="font-size:.7rem;color:var(--text3)">' + latest.date + '</div></div><div style="text-align:right"><div style="font-family:var(--fd);font-size:1.1rem">' + (latest.weight || '—') + ' lbs</div>' + chg(latest.weight, prev && prev.weight, ' lbs') + '</div></div><div class="trend-row"><div class="trico">📏</div><div style="flex:1"><div style="font-size:.83rem;font-weight:500">Waist</div></div><div style="text-align:right"><div style="font-family:var(--fd);font-size:1.1rem">' + (latest.waist || '—') + '"</div>' + chg(latest.waist, prev && prev.waist, '"') + '</div></div><div class="trend-row"><div class="trico">⚡</div><div style="flex:1"><div style="font-size:.83rem;font-weight:500">Energy</div></div><div style="text-align:right"><div style="font-family:var(--fd);font-size:1.1rem">' + (latest.energy || '—') + '/10</div></div></div>';
+    }
+  }
+}
+
+// ── PANTRY RENDER ─────────────────────────────────────────────
+function renderPantry() {
+  var low = [];
+  for (var i = 0; i < INVENTORY.length; i++) { if (INVENTORY[i].days <= 5) low.push(INVENTORY[i]); }
+  var lc = document.getElementById('low-card');
+  if (lc) {
+    lc.style.display = low.length ? 'block' : 'none';
+    var ll = document.getElementById('low-list');
+    if (ll) {
+      var html = '';
+      for (var i = 0; i < low.length; i++) {
+        var item = low[i];
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(200,162,86,.2)"><div style="font-size:.85rem;font-weight:500">' + (item.emoji || '📦') + ' ' + item.name + '</div><span class="stag ' + (item.days <= 2 ? 'sout' : 'slow') + '">' + (item.days <= 2 ? '⚠ soon' : item.days + 'd left') + '</span></div>';
+      }
+      ll.innerHTML = html;
+    }
+  }
+
+  var sl = document.getElementById('shop-list');
+  if (sl) {
+    var html = '';
+    for (var ci = 0; ci < COSTCO_LIST.length; ci++) {
+      var cat = COSTCO_LIST[ci];
+      html += '<div class="shop-cat">' + cat.cat + '</div>';
+      for (var ii = 0; ii < cat.items.length; ii++) {
+        var item = cat.items[ii];
+        var key = ci + '_' + ii;
+        var checked = !!SHOPLIST[key];
+        html += '<div class="shop-item" onclick="toggleShop(\'' + key + '\',this)"><div class="sh-c' + (checked ? ' on' : '') + '">' + (checked ? '✓' : '') + '</div><div style="flex:1"><div class="sh-name" style="' + (checked ? 'text-decoration:line-through;opacity:.5' : '') + '">' + item.name + '</div><div class="sh-detail">' + item.detail + '</div></div><span class="sh-brand">' + item.brand + '</span></div>';
+      }
+    }
+    sl.innerHTML = html;
+  }
+
+  var il = document.getElementById('inv-list');
+  if (il) {
+    var html = '';
+    for (var i = 0; i < INVENTORY.length; i++) {
+      var item = INVENTORY[i];
+      html += '<div class="inv-item"><div class="inv-ico">' + (item.emoji || '📦') + '</div><div style="flex:1"><div style="font-size:.85rem;font-weight:500">' + item.name + '</div><div style="font-size:.7rem;color:var(--text3)">' + item.cat + '</div></div><div style="text-align:right"><div style="font-family:var(--fd);font-size:1.1rem">' + item.qty + ' ' + item.unit + '</div><span class="stag ' + (item.days <= 3 ? 'sout' : item.days <= 7 ? 'slow' : 'sok') + '">' + (item.days <= 3 ? '⚠ soon' : item.days + 'd left') + '</span></div></div>';
+    }
+    il.innerHTML = html;
+  }
+}
+
+// ── RECIPES RENDER ────────────────────────────────────────────
+var recFilter = 'all';
+function renderRecipes() { filterRec(recFilter, null); }
+function filterRec(f, btn) {
+  recFilter = f;
+  var btns = document.querySelectorAll('.fb-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].className = 'fb-btn' + (btns[i].dataset.f === f ? ' on' : '');
+  var filtered = f === 'all' ? RECIPES : [];
+  if (f !== 'all') { for (var i = 0; i < RECIPES.length; i++) { if (RECIPES[i].cat === f) filtered.push(RECIPES[i]); } }
+  var rl = document.getElementById('recipe-list');
+  if (!rl) return;
+  var html = '';
+  for (var i = 0; i < filtered.length; i++) {
+    var r = filtered[i];
+    html += '<div class="rc" onclick="showRecipe(\'' + r.id + '\')">';
+    html += '<div class="rt"><span style="font-size:2.4rem">' + r.emoji + '</span><div style="flex:1"><div style="font-family:var(--fd);font-size:1.15rem;font-weight:400;margin-bottom:3px">' + r.title + '</div><div style="font-size:.7rem;color:var(--text3)">⏱ ' + r.time + '</div></div></div>';
+    html += '<div class="rb"><div class="rmacs">';
+    if (r.cals) html += '<div class="rm"><span class="rmv">' + r.cals + '</span><span class="rml">Kcal</span></div>';
+    html += '<div class="rm"><span class="rmv">' + r.protein + 'g</span><span class="rml">Protein</span></div>';
+    html += '<div class="rm"><span class="rmv">' + r.fiber + 'g</span><span class="rml">Fiber</span></div>';
+    if (r.omega) html += '<div class="rm"><span class="rmv">' + r.omega + 'g</span><span class="rml">Omega-3</span></div>';
+    html += '</div><ul class="il">';
+    for (var j = 0; j < Math.min(3, r.ingredients.length); j++) html += '<li>' + r.ingredients[j] + '</li>';
+    if (r.ingredients.length > 3) html += '<li style="color:var(--text3)">+' + (r.ingredients.length - 3) + ' more…</li>';
+    html += '</ul></div></div>';
+  }
+  rl.innerHTML = html;
+}
+
+function showRecipe(id) {
+  var r = null;
+  for (var i = 0; i < RECIPES.length; i++) { if (RECIPES[i].id === id) { r = RECIPES[i]; break; } }
+  if (!r) return;
+  var c = document.getElementById('m-recipe-content');
+  if (!c) return;
+  var stepsHtml = '';
+  for (var i = 0; i < r.steps.length; i++) stepsHtml += '<li style="font-size:.82rem;color:var(--text2);margin-bottom:7px;line-height:1.6">' + r.steps[i] + '</li>';
+  var ingrHtml = '';
+  for (var i = 0; i < r.ingredients.length; i++) ingrHtml += '<li>' + r.ingredients[i] + '</li>';
+  c.innerHTML = '<div class="mh"></div><div style="font-size:3rem;text-align:center;margin-bottom:12px">' + r.emoji + '</div><div class="mtitle" style="text-align:center">' + r.title + '</div><div class="rmacs" style="margin-bottom:16px">' + (r.cals ? '<div class="rm"><span class="rmv">' + r.cals + '</span><span class="rml">Kcal</span></div>' : '') + '<div class="rm"><span class="rmv">' + r.protein + 'g</span><span class="rml">Protein</span></div><div class="rm"><span class="rmv">' + r.fiber + 'g</span><span class="rml">Fiber</span></div></div><div class="fl" style="margin-bottom:8px">Ingredients</div><ul class="il" style="margin-bottom:16px">' + ingrHtml + '</ul><div class="fl" style="margin-bottom:8px">Instructions</div><ol style="padding-left:16px;margin-bottom:16px">' + stepsHtml + '</ol>' + (r.notes ? '<div style="background:var(--cream2);border-radius:12px;padding:12px 14px;border:1px solid var(--border);font-size:.78rem;color:var(--text2);line-height:1.7"><strong style="color:var(--accent)">🌸 Note:</strong> ' + r.notes + '</div>' : '') + '<button class="btn" onclick="logFromRecipe(\'' + r.id + '\')" style="margin-top:16px">Log This Meal</button><button class="btn btn-out" onclick="closeModal(\'m-recipe\')" style="margin-top:8px">Close</button>';
+  openModal('m-recipe');
+}
+
+function logFromRecipe(id) {
+  var r = null;
+  for (var i = 0; i < RECIPES.length; i++) { if (RECIPES[i].id === id) { r = RECIPES[i]; break; } }
+  if (!r) return;
+  document.getElementById('lm-name').value = r.title;
+  document.getElementById('lm-cals').value = r.cals || 0;
+  document.getElementById('lm-pro').value = r.protein || 0;
+  document.getElementById('lm-carbs').value = r.carbs || 0;
+  document.getElementById('lm-fat').value = r.fat || 0;
+  document.getElementById('lm-fiber').value = r.fiber || 0;
+  document.getElementById('lm-omega').value = r.omega || 0;
+  closeModal('m-recipe');
+  openModal('m-meal');
+}
+
+// ── PLAN RENDER ───────────────────────────────────────────────
+function renderPlan() {
+  setText('ai-plan-text', AI_PLAN || 'Tap "Generate Monthly Plan" to build your personalized plan using Claude AI.\n\nAdd your Claude API key in ⚙️ Settings first.');
+  var day = cycleDay();
+  var phase = cyclePhase(day);
+  setText('cyc-detail', phase.name + ' · Day ' + day);
+
+  var cb = document.getElementById('cyc-bar');
+  if (cb) {
+    var phases = [{cls:'cyc-m',d:[1,5]},{cls:'cyc-f',d:[6,13]},{cls:'cyc-o',d:[14,15]},{cls:'cyc-l',d:[16,28]}];
+    var html = '';
+    for (var i = 0; i < phases.length; i++) {
+      var p = phases[i];
+      var active = day >= p.d[0] && day <= p.d[1];
+      var flex = p.d[1] - p.d[0] + 1;
+      html += '<div class="cs ' + p.cls + '" style="flex:' + flex + (active ? ';outline:2px solid rgba(0,0,0,.3);outline-offset:-2px' : '') + '"></div>';
+    }
+    cb.innerHTML = html;
+  }
+
+  var guidance = { Menstrual:'Rest more. Iron-rich foods: beef, lentils, spinach. Gentle exercise only — yoga, walking. Anti-inflammatory focus: turmeric, ginger, omega-3.', Follicular:'Energy rising — best time for higher-intensity workouts. Add ground flaxseeds + pumpkin seeds for seed cycling. Focus on building: protein + complex carbs.', Ovulation:'Peak energy window — ideal for your hardest workout. Zinc + B6 especially important now to support corpus luteum formation.', Luteal:'Progesterone support phase. Magnesium + B6 + Zinc are your most important supplements. Reduce ultra-intense exercise. Prioritize sleep.' };
+  setText('phase-guide', guidance[phase.name] || '');
+
+  var ll = document.getElementById('lab-list');
+  if (ll) {
+    if (!LABS.length) { ll.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:.85rem">No labs logged yet. Tap Log Labs above.</div>'; }
+    else {
+      var latest = LABS[0];
+      var rows = [
+        { name:'Progesterone', val:(latest.prog || '—') + ' ng/mL', range:'Luteal 2.6–21.5', status:'lborder', note:'Low-normal for luteal phase' },
+        { name:'Estradiol', val:(latest.estradiol || '—') + ' pg/mL', range:'Luteal 56–214', status:'lok', note:'Within range ✓' },
+        { name:'TSH', val:(latest.tsh || '—') + ' mIU/L', range:'0.40–4.50', status:'lok', note:'Thyroid controlled ✓' },
+        { name:'IR Score', val:latest.ir || '—', range:'<33 = sensitive', status:'lok', note:'No insulin resistance ✓' },
+        { name:'hsCRP', val:(latest.crp || '—') + ' mg/L', range:'Optimal <1.0', status:'lok', note:'Low inflammation ✓' },
+        { name:'DHEA-S', val:(latest.dheas || '—') + ' ng/dL', range:'Normal range', status:'lok', note:'Adrenals healthy ✓' },
+        { name:'FIB-4', val:latest.fib4 || '—', range:'<1.30 no fibrosis', status:'lok', note:'Fatty liver resolved ✓' },
+        { name:'Free Testosterone', val:latest.ft || 'Pending', range:'TBD', status:(!latest.ft || latest.ft === 'pending') ? 'lwatch' : 'lok', note:'Order: questhealth.com' },
+        { name:'SHBG', val:latest.shbg || 'Pending', range:'TBD', status:(!latest.shbg || latest.shbg === 'pending') ? 'lwatch' : 'lok', note:'Order: questhealth.com' },
+      ];
+      var html = '';
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        html += '<div class="lab-row"><div><div class="lname">' + r.name + '</div><div class="lrange">' + r.range + '</div></div><div><div class="lval">' + r.val + '</div><div class="lstatus ' + r.status + '">' + r.note + '</div></div></div>';
+      }
+      ll.innerHTML = html;
+    }
+  }
+
+  var ins = document.getElementById('ins-list');
+  if (ins) {
+    var html = '';
+    for (var i = 0; i < INSIGHTS.length; i++) {
+      var it = INSIGHTS[i];
+      html += '<div class="ins"><div class="ins-ico ' + it.cls + '">' + it.icon + '</div><div class="ins-text">' + it.text + '</div></div>';
+    }
+    ins.innerHTML = html;
+  }
+}
+
+// ── INTERACTIONS ──────────────────────────────────────────────
+function toggleWater(i) {
+  var wc = DAILY.water || 0;
+  DAILY.water = i < wc ? i : i + 1;
+  DAILY.water = Math.min(PROFILE.waterTarget || 11, DAILY.water);
+  saveDaily(); renderHome();
+  if (DAILY.water === (PROFILE.waterTarget || 11)) toast('💧', 'Hydration goal hit!', 'Great work today! 🎉');
+}
+
+function toggleTea(i) {
+  if (!DAILY.tea) DAILY.tea = [false, false];
+  DAILY.tea[i] = !DAILY.tea[i];
+  saveDaily(); renderHome();
+  if (DAILY.tea[0] && DAILY.tea[1]) toast('🍵', 'Spearmint done!', 'Anti-androgen protocol complete for today.');
+}
+
+function toggleSupp(i) {
+  if (!DAILY.suppChecked) DAILY.suppChecked = {};
+  DAILY.suppChecked[i] = !DAILY.suppChecked[i];
+  saveDaily(); renderHome();
+}
+
+function togglePrac(i) {
+  if (!DAILY.pracChecked) DAILY.pracChecked = {};
+  DAILY.pracChecked[i] = !DAILY.pracChecked[i];
+  saveDaily(); renderHome();
+}
+
+function preFill(type) {
+  var mp = null;
+  for (var i = 0; i < MEALS_PLAN.length; i++) { if (MEALS_PLAN[i].type === type) { mp = MEALS_PLAN[i]; break; } }
+  if (!mp) { openModal('m-meal'); return; }
+  document.getElementById('lm-type').value = type;
+  document.getElementById('lm-name').value = mp.name;
+  document.getElementById('lm-cals').value = mp.cals;
+  document.getElementById('lm-pro').value = mp.protein;
+  document.getElementById('lm-carbs').value = mp.carbs;
+  document.getElementById('lm-fat').value = mp.fat;
+  document.getElementById('lm-fiber').value = mp.fiber;
+  document.getElementById('lm-omega').value = mp.omega;
+  openModal('m-meal');
+}
+
+function logMeal() {
+  var name = val('lm-name').trim();
+  if (!name) { toast('⚠️', 'Name required', 'Please enter what you ate.'); return; }
+  var type = val('lm-type');
+  var meal = {
+    type: type, name: name,
+    cals: parseInt(val('lm-cals')) || 0,
+    protein: parseInt(val('lm-pro')) || 0,
+    carbs: parseInt(val('lm-carbs')) || 0,
+    fat: parseInt(val('lm-fat')) || 0,
+    fiber: parseInt(val('lm-fiber')) || 0,
+    omega: parseFloat(val('lm-omega')) || 0,
+    emoji: (function() { for (var i = 0; i < MEALS_PLAN.length; i++) { if (MEALS_PLAN[i].type === type) return MEALS_PLAN[i].emoji; } return '🍽️'; })(),
+    logged: true,
+    time: new Date().toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'})
+  };
+  if (!DAILY.meals) DAILY.meals = [];
+  DAILY.meals.push(meal);
+  DAILY.cals = (DAILY.cals || 0) + meal.cals;
+  DAILY.protein = (DAILY.protein || 0) + meal.protein;
+  DAILY.carbs = (DAILY.carbs || 0) + meal.carbs;
+  DAILY.fat = (DAILY.fat || 0) + meal.fat;
+  DAILY.fiber = (DAILY.fiber || 0) + meal.fiber;
+  DAILY.omega = (DAILY.omega || 0) + meal.omega;
+  var fields = ['lm-name','lm-cals','lm-pro','lm-carbs','lm-fat','lm-fiber','lm-omega'];
+  for (var i = 0; i < fields.length; i++) { var e = document.getElementById(fields[i]); if (e) e.value = ''; }
+  saveDaily(); closeModal('m-meal'); renderHome();
+  toast('✓', 'Meal Logged!', name + ' — ' + meal.cals + ' kcal · ' + meal.protein + 'g protein');
+  if ((DAILY.protein || 0) >= (PROFILE.proteinTarget || 110)) toast('💪', 'Protein goal hit!', 'You reached your daily target!');
+}
+
+function logMetrics() {
+  var entry = { date: new Date().toISOString().split('T')[0], weight: parseFloat(val('mt-w')) || null, bf: parseFloat(val('mt-bf')) || null, waist: parseFloat(val('mt-wa')) || null, hip: parseFloat(val('mt-hi')) || null, energy: parseInt(val('mt-en')) || null, mood: parseInt(val('mt-mo')) || null, notes: val('mt-no') };
+  if (!entry.weight) { toast('⚠️', 'Weight required'); return; }
+  METRICS.unshift(entry);
+  lsSet('metrics_' + (USER ? USER.email : 'guest'), METRICS);
+  closeModal('m-metrics'); renderGym();
+  toast('📊', 'Metrics saved!', 'Weight: ' + entry.weight + ' lbs');
+}
+
+function logLabs() {
+  var entry = { date: val('lb-dt') || new Date().toISOString().split('T')[0], prog: parseFloat(val('lb-pr')) || null, estradiol: parseFloat(val('lb-es')) || null, tsh: parseFloat(val('lb-ts')) || null, ir: parseFloat(val('lb-ir')) || null, crp: parseFloat(val('lb-cr')) || null, dheas: parseFloat(val('lb-dh')) || null, ft: val('lb-ft') || 'pending', shbg: val('lb-sh') || 'pending' };
+  LABS.unshift(entry);
+  lsSet('labs_' + (USER ? USER.email : 'guest'), LABS);
+  closeModal('m-labs'); renderPlan();
+  toast('🔬', 'Labs saved!');
+}
+
+function addInv() {
+  var name = val('ai-name').trim(); if (!name) return;
+  INVENTORY.push({ name: name, cat: val('ai-cat'), qty: parseInt(val('ai-qty')) || 1, unit: val('ai-unit'), days: parseInt(val('ai-days')) || 7, emoji: '📦' });
+  lsSet('inv_' + (USER ? USER.email : 'guest'), INVENTORY);
+  closeModal('m-add-item'); renderPantry();
+  toast('✓', 'Added!', name);
+}
+
+function toggleShop(key) {
+  SHOPLIST[key] = !SHOPLIST[key];
+  lsSet('shop_' + (USER ? USER.email : 'guest'), SHOPLIST);
+  renderPantry();
+}
+
+function checkAll() {
+  for (var ci = 0; ci < COSTCO_LIST.length; ci++) {
+    for (var ii = 0; ii < COSTCO_LIST[ci].items.length; ii++) SHOPLIST[ci + '_' + ii] = true;
+  }
+  lsSet('shop_' + (USER ? USER.email : 'guest'), SHOPLIST);
+  renderPantry(); toast('✓', 'All checked!');
+}
+
+function openSettings() {
+  document.getElementById('set-n').value = PROFILE.name || '';
+  document.getElementById('set-w').value = PROFILE.weight || '';
+  document.getElementById('set-c').value = PROFILE.calorieTarget || 1450;
+  document.getElementById('set-p').value = PROFILE.proteinTarget || 110;
+  document.getElementById('set-wa').value = PROFILE.waterTarget || 11;
+  document.getElementById('set-per').value = PROFILE.periodStart || '';
+  document.getElementById('set-wt').value = PROFILE.workoutTime || '14:00';
+  document.getElementById('set-api').value = PROFILE.apiKey || '';
+  openModal('m-settings');
+}
+
+function saveSettings() {
+  var name = val('set-n').trim() || PROFILE.name;
+  PROFILE.name = name;
+  PROFILE.weight = parseFloat(val('set-w')) || PROFILE.weight;
+  PROFILE.calorieTarget = parseInt(val('set-c')) || PROFILE.calorieTarget;
+  PROFILE.proteinTarget = parseInt(val('set-p')) || PROFILE.proteinTarget;
+  PROFILE.waterTarget = parseInt(val('set-wa')) || PROFILE.waterTarget;
+  PROFILE.periodStart = val('set-per') || PROFILE.periodStart;
+  PROFILE.workoutTime = val('set-wt') || PROFILE.workoutTime;
+  var apiKey = val('set-api').trim();
+  if (apiKey) { PROFILE.apiKey = apiKey; lsSet('flora_apikey', apiKey); }
+  if (USER) lsSet('profile_' + USER.email, PROFILE);
+  setText('hdr-name', PROFILE.name || '');
+  closeModal('m-settings'); renderHome();
+  toast('✓', 'Settings saved!');
+}
+
+// ── WORKOUT ───────────────────────────────────────────────────
+function startWorkout() {
+  var btn = document.getElementById('start-wo-btn');
+  if (btn) { btn.textContent = 'Workout Started! ✓'; btn.style.background = 'var(--sage)'; btn.disabled = true; }
+  WORKOUTS.push({ date: new Date().toISOString(), sets: 0, duration: 0 });
+  lsSet('workouts_' + (USER ? USER.email : 'guest'), WORKOUTS);
+  toast('💪', 'Workout Started!', 'Tap each set to mark it done.');
+}
+
+var timerInt;
+function startRestTimer(secs) {
+  clearInterval(timerInt);
+  var rem = secs;
+  var rt = document.getElementById('rest-timer');
+  if (rt) rt.className = 'rest-timer';
+  var update = function() {
+    if (rem <= 0) { clearInterval(timerInt); var rt2 = document.getElementById('rest-timer'); if(rt2) rt2.className = 'rest-timer hide'; toast('⚡', 'Rest done!', 'Next set!'); return; }
+    var m = Math.floor(rem / 60), s = rem % 60;
+    setText('timer-n', m + ':' + (s < 10 ? '0' : '') + s);
+    rem--;
+  };
+  update(); timerInt = setInterval(update, 1000);
+}
+function stopTimer() { clearInterval(timerInt); var rt = document.getElementById('rest-timer'); if(rt) rt.className = 'rest-timer hide'; }
+function togMuscle(btn) { btn.className = btn.className.indexOf(' on') >= 0 ? 'mb' : 'mb on'; }
+function buildWo() {
+  var name = val('wo-n') || 'Custom Workout';
+  var muscles = document.querySelectorAll('.mb.on');
+  if (!muscles.length) { toast('⚠️', 'Select muscles', 'Choose at least one.'); return; }
+  toast('✓', 'Workout built!', name + ' · ' + muscles.length + ' muscle groups');
+  closeModal('m-build-wo');
+}
+
+// ── SCANNER ───────────────────────────────────────────────────
+var scanStream = null, scanInt = null, scanned = null;
+
+function startScan() {
+  var status = document.getElementById('scan-status');
+  var container = document.getElementById('scanner-container');
+  var startArea = document.getElementById('scan-start');
+  var video = document.getElementById('scan-vid');
+  if (!navigator.mediaDevices) { if(status) status.textContent = 'Camera not supported.'; return; }
+  if (status) status.textContent = 'Requesting camera…';
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(function(stream) {
+      scanStream = stream;
+      video.srcObject = stream;
+      video.play();
+      if (container) container.style.display = 'block';
+      if (startArea) startArea.style.display = 'none';
+      if (status) status.textContent = 'Scanning… point at a barcode';
+      loadZXing(function() { startDecode(); }, function() { if(status) status.textContent = 'Scanner error. Use manual entry.'; });
+    })
+    .catch(function(e) { if (status) status.textContent = e.name === 'NotAllowedError' ? 'Camera permission denied. Use manual entry.' : 'Camera error. Use manual entry.'; });
+}
+
+function loadZXing(onLoad, onErr) {
+  if (window.ZXing) { onLoad(); return; }
+  var s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.21.3/umd/index.min.js';
+  s.onload = onLoad; s.onerror = onErr;
+  document.head.appendChild(s);
+}
+
+function startDecode() {
+  var video = document.getElementById('scan-vid');
+  var canvas = document.getElementById('scan-canvas');
+  var ctx = canvas.getContext('2d');
+  var status = document.getElementById('scan-status');
+  try {
+    var reader = new ZXing.MultiFormatReader();
+    scanInt = setInterval(function() {
+      if (!video.videoWidth) return;
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      try {
+        var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var ls = new ZXing.RGBLuminanceSource(img.data, canvas.width, canvas.height);
+        var bb = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(ls));
+        var result = reader.decode(bb);
+        if (result) { clearInterval(scanInt); if (status) status.textContent = '✓ Barcode: ' + result.getText(); lookupBarcode2(result.getText()); }
+      } catch(e) {}
+    }, 300);
+  } catch(e) { if (status) document.getElementById('scan-status').textContent = 'Scanner error.'; }
+}
+
+function stopScan() {
+  if (scanInt) { clearInterval(scanInt); scanInt = null; }
+  if (scanStream) { scanStream.getTracks().forEach(function(t) { t.stop(); }); scanStream = null; }
+  var c = document.getElementById('scanner-container'); if (c) c.style.display = 'none';
+  var s = document.getElementById('scan-start'); if (s) s.style.display = 'block';
+  var r = document.getElementById('scan-result'); if (r) r.style.display = 'none';
+  var st = document.getElementById('scan-status'); if (st) st.textContent = '';
+}
+
+function lookupBC() {
+  var code = val('bc-input').trim();
+  if (!code) return;
+  lookupBarcode2(code);
+}
+
+function lookupBarcode2(code) {
+  var status = document.getElementById('scan-status');
+  if (status) status.textContent = 'Looking up…';
+  stopScan();
+  var local = { '078742043890':{name:'Wild Planet Sardines',brand:'Wild Planet',cat:'Protein',emoji:'🐠',cals:190,protein:23,carbs:0,fat:11,fiber:0,omega:1.3}, '021130126026':{name:'Wild Planet Tuna',brand:'Wild Planet',cat:'Protein',emoji:'🐟',cals:100,protein:22,carbs:0,fat:1,fiber:0,omega:0.5} };
+  if (local[code]) { showScanResult(local[code]); return; }
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'https://world.openfoodfacts.org/api/v0/product/' + code + '.json', true);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          if (data.status === 1 && data.product) {
+            var p = data.product, n = p.nutriments || {};
+            showScanResult({ name: p.product_name || 'Unknown', brand: p.brands || '', cat: 'Pantry', emoji: '📦', cals: Math.round(n['energy-kcal_100g'] || 0), protein: Math.round((n.proteins_100g || 0) * 10) / 10, carbs: Math.round((n.carbohydrates_100g || 0) * 10) / 10, fat: Math.round((n.fat_100g || 0) * 10) / 10, fiber: Math.round((n.fiber_100g || 0) * 10) / 10, omega: 0 });
+          } else { if (status) status.textContent = 'Not found. Try manual entry.'; var sa = document.getElementById('scan-start'); if(sa) sa.style.display='block'; }
+        } catch(e) { if (status) status.textContent = 'Lookup failed.'; }
+      } else { if (status) status.textContent = 'Lookup failed. Check connection.'; }
+    }
+  };
+  xhr.send();
+}
+
+function showScanResult(product) {
+  scanned = product;
+  setText('sr-name', product.name);
+  setText('sr-brand', product.brand || '');
+  var r = document.getElementById('scan-result'); if (r) r.style.display = 'block';
+  var st = document.getElementById('scan-status'); if (st) st.textContent = '';
+}
+
+function scanToPantry() {
+  if (!scanned) return;
+  INVENTORY.push({ name: scanned.name, cat: scanned.cat || 'Pantry', qty: 1, unit: 'count', days: 14, emoji: scanned.emoji || '📦' });
+  lsSet('inv_' + (USER ? USER.email : 'guest'), INVENTORY);
+  stopScan(); closeModal('m-scan'); renderPantry();
+  toast('✓', 'Added!', scanned.name); scanned = null;
+}
+
+function scanToMeal() {
+  if (!scanned) return;
+  document.getElementById('lm-name').value = scanned.name;
+  document.getElementById('lm-cals').value = scanned.cals || 0;
+  document.getElementById('lm-pro').value = scanned.protein || 0;
+  document.getElementById('lm-carbs').value = scanned.carbs || 0;
+  document.getElementById('lm-fat').value = scanned.fat || 0;
+  document.getElementById('lm-fiber').value = scanned.fiber || 0;
+  document.getElementById('lm-omega').value = scanned.omega || 0;
+  stopScan(); closeModal('m-scan'); openModal('m-meal'); scanned = null;
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────
+function scheduleNotifs() {
+  if (!window.Notification || Notification.permission !== 'granted') return;
+  var now = new Date();
+  var msUntil = function(h, m) {
+    var t = new Date(); t.setHours(h, m || 0, 0, 0);
+    if (t <= now) t.setDate(t.getDate() + 1);
+    return t - now;
+  };
+  setTimeout(function() { new Notification('💊 Morning Supplements', { body: 'Ovasitol, Vitamin C, B6, Vitex + Spearmint!' }); }, msUntil(8));
+  setTimeout(function() { new Notification('💧 Hydration Check', { body: 'Have you had your water today?' }); }, msUntil(12));
+  setTimeout(function() { new Notification('💊 Bedtime Supplements', { body: 'Magnesium Glycinate + Probiotic!' }); }, msUntil(22));
+}
+
+// ── PERSONALIZED SUPPLEMENTS ──────────────────────────────────
+function getSupps() {
+  var conds = PROFILE.conditions || [];
+  var hasCond = function(c) { for (var i = 0; i < conds.length; i++) { if (conds[i].toLowerCase().indexOf(c.toLowerCase()) >= 0) return true; } return false; };
+  var base = [
+    { name:'Vitamin C', dose:'1000mg', time:'morning', benefit:'Progesterone synthesis' },
+    { name:'Magnesium Glycinate', dose:'300-400mg', time:'bedtime', benefit:'Progesterone + sleep' },
+    { name:'Omega-3 Fish Oil', dose:'2g EPA+DHA', time:'dinner', benefit:'Inflammation + hormones' },
+    { name:'Probiotic', dose:'50B CFU', time:'bedtime', benefit:'Gut + estrogen metabolism' },
+    { name:'Vitamin D3', dose:'2000-4000 IU', time:'morning', benefit:'Hormone + immune support' },
+    { name:'Zinc Picolinate', dose:'30mg', time:'dinner', benefit:'Hormone + ovulation support' },
+    { name:'Chia Seeds', dose:'2 tbsp in water', time:'after dinner', benefit:'Gut motility + estrogen clearance' },
+  ];
+  if (hasCond('pcos')) {
+    base.unshift({ name:'Ovasitol Inositol', dose:'1 scoop (40:1 ratio)', time:'morning', benefit:'PCOS core — LH/FSH regulation' });
+    base.splice(2, 0, { name:'Vitex Chasteberry', dose:'400mg', time:'morning', benefit:'LH regulation + progesterone' });
+    base.splice(3, 0, { name:'Spearmint Extract', dose:'900mg or 2 cups tea', time:'morning', benefit:'Anti-androgen — testosterone reduction' });
+    base.splice(4, 0, { name:'Vitamin B6 (P5P)', dose:'50mg', time:'morning', benefit:'Hormone metabolism' });
+  }
+  if (hasCond('hashimoto') || hasCond('thyroid')) base.push({ name:'Selenium', dose:'200mcg (2 Brazil nuts)', time:'morning', benefit:'Thyroid + Hashimoto\'s support' });
+  if (hasCond('menopause') || hasCond('perimenopause')) { base.push({ name:'Black Cohosh', dose:'20-40mg', time:'morning', benefit:'Menopause symptom relief' }); base.push({ name:'Evening Primrose Oil', dose:'1000mg', time:'dinner', benefit:'Hormonal balance' }); }
+  if (hasCond('osteo')) { base.push({ name:'Calcium Citrate', dose:'500mg', time:'dinner', benefit:'Bone density' }); base.push({ name:'Vitamin K2 (MK7)', dose:'100mcg', time:'dinner', benefit:'Directs calcium to bones' }); }
+  return base;
+}
+
+// ── STATIC DATA ───────────────────────────────────────────────
+var PRACTICES = [
+  { name:'Morning sunlight', detail:'10-15 min outside · anchors cortisol rhythm', emoji:'☀️' },
+  { name:'After-dinner walk', detail:'10-15 min · blood sugar + gut motility', emoji:'🚶' },
+  { name:'Castor oil pack', detail:'3-4x/week · liver + estrogen clearance', emoji:'🧴' },
+  { name:'Breathwork / meditation', detail:'10 min · lowers cortisol measurably', emoji:'🧘' },
+  { name:'Apple cider vinegar', detail:'1 tbsp before meals · digestion + blood sugar', emoji:'💧' },
+  { name:'Abdominal massage', detail:'5 min clockwise · gut motility', emoji:'🫴' },
+];
+
+var MEALS_PLAN = [
+  { type:'Breakfast', name:'Savory Egg & Spinach Bowl', emoji:'🍳', cals:420, protein:38, carbs:12, fat:22, fiber:8, omega:0.2 },
+  { type:'Pre-Workout', name:'Chickpeas + Mixed Berries', emoji:'🫘', cals:185, protein:8, carbs:28, fat:2, fiber:7, omega:0.1 },
+  { type:'Lunch', name:'PCOS Power Bowl with Salmon', emoji:'🥗', cals:490, protein:42, carbs:22, fat:24, fiber:9, omega:1.8 },
+  { type:'Post-Workout', name:'Greek Yogurt + Berries + Pumpkin Seeds', emoji:'🥛', cals:210, protein:22, carbs:18, fat:8, fiber:4, omega:0.1 },
+  { type:'Dinner', name:'Grass-Fed Beef + Broccoli + Lentils', emoji:'🥩', cals:520, protein:46, carbs:28, fat:18, fiber:12, omega:0.2 },
+];
+
+var WORKOUTS_DATA = [
+  { day:'Mon', name:'Lower Body Power', note:'Glutes + quads + hamstrings', exercises:[{name:'Barbell Squat',muscle:'Quads + Glutes',sets:4,reps:'8-10',rest:90},{name:'Romanian Deadlift',muscle:'Hamstrings + Glutes',sets:4,reps:'10-12',rest:90},{name:'Hip Thrust',muscle:'Glutes',sets:4,reps:'12-15',rest:75},{name:'Walking Lunges',muscle:'Quads + Glutes',sets:3,reps:'12 each',rest:60}] },
+  { day:'Wed', name:'Upper Body + Core', note:'Compound pulling + pushing', exercises:[{name:'Lat Pulldown',muscle:'Back + Biceps',sets:4,reps:'10-12',rest:90},{name:'Dumbbell Bench Press',muscle:'Chest + Triceps',sets:4,reps:'10-12',rest:90},{name:'Seated Cable Row',muscle:'Upper Back',sets:3,reps:'12-15',rest:75},{name:'Plank Hold',muscle:'Core',sets:3,reps:'45-60 sec',rest:45}] },
+  { day:'Fri', name:'Full Body Compound', note:'Highest metabolic impact', exercises:[{name:'Conventional Deadlift',muscle:'Full Posterior Chain',sets:4,reps:'6-8',rest:120},{name:'Goblet Squat',muscle:'Quads + Core',sets:3,reps:'12-15',rest:75},{name:'Push-Up',muscle:'Chest + Shoulders',sets:3,reps:'10-15',rest:75},{name:'Dumbbell Row',muscle:'Back + Biceps',sets:3,reps:'10-12 each',rest:75}] },
+];
+
+var INSIGHTS = [
+  { icon:'🧬', cls:'irose', text:'<strong>Lean PCOS confirmed.</strong> Your IR score of 4 rules out insulin resistance. Your PCOS is driven by estrogen/progesterone ratio imbalance — highly responsive to targeted nutrition and supplements.' },
+  { icon:'🌿', cls:'isage', text:'<strong>Spearmint tea is your most important daily habit.</strong> Two cups daily reduced free testosterone by 29% in a randomized controlled trial. Non-negotiable for your hair and androgen symptoms.' },
+  { icon:'🔬', cls:'iblue', text:'<strong>Next labs needed:</strong> Free Testosterone + SHBG (questhealth.com — Men\'s Hormone Basic ~$89) and DHEA-S + Morning Cortisol (~$99). These complete your PCOS hormonal picture.' },
+  { icon:'💊', cls:'irose', text:'<strong>Progesterone 15.0 on Day 22</strong> is low-normal. Optimal is 15-20+ for symptom relief. Your Vitex + Vitamin C + Magnesium + Zinc protocol is designed to push this higher over 3 months.' },
+  { icon:'💪', cls:'igold', text:'<strong>Strength training at 2pm</strong> is optimal for cortisol rhythm. Keep cardio moderate — intense cardio raises cortisol which directly suppresses progesterone in Lean PCOS.' },
+  { icon:'🫒', cls:'isage', text:'<strong>Fatty liver resolved.</strong> FIB-4 of 0.62, ALT 16, AST 19, GGT 11 are all exceptional. Maintain your no-seed-oil, anti-inflammatory diet to keep it this way.' },
+];
+
+var DEFAULT_LABS = [{
+  date:'2026-04-13', prog:15.0, estradiol:134, tsh:2.75, ir:4,
+  ft:'pending', shbg:'pending', crp:0.6, dheas:787, hba1c:4.7,
+  fib4:0.62, hdl:64, ldl:89, triglycerides:63, apob:79,
+  notes:'Quest Diagnostics Apr 13 2026 · Day 22 · Fasting · Lean PCOS confirmed'
+}];
+
+var DEFAULT_PLAN = 'FLORA PERSONALIZED WELLNESS PLAN — May 2026\n\nYOUR WELLNESS PROFILE\nYou have confirmed Lean PCOS with Hashimoto\'s thyroiditis (controlled) and Melasma. Your April 2026 labs reveal exceptional metabolic health — IR score of 4, fasting insulin <3, HbA1c 4.7%, hsCRP 0.6 — ruling out insulin resistance as a driver. Your symptoms are driven by the estrogen/progesterone ratio imbalance characteristic of Lean PCOS, compounded by 14 months of daily synthetic musk exposure (Santal 33 + EDITION diffuser) which has since been removed. You are now in the recovery arc.\n\nTOP 3 PRIORITIES THIS MONTH\n1. Progesterone support — Vitex + Vitamin C 1000mg + Magnesium Glycinate + Zinc daily. Your progesterone of 15.0 on Day 22 needs to reach 15-20+ for symptom relief.\n2. Anti-androgen protocol — spearmint tea 2 cups daily, non-negotiable. Clinical trials show 29% reduction in free testosterone with consistent use.\n3. Estrogen clearance — cruciferous vegetables daily for DIM. Chia seed fiber protocol for gut-based estrogen clearance.\n\nNEXT LABS TO ORDER\nFree Testosterone + SHBG (questhealth.com — Men\'s Hormone Basic ~$89)\nDHEA-S + Morning Cortisol (Adrenal Panel ~$99)\n\nDOCTOR TO BOOK\nFunctional medicine gynecologist specializing in Lean PCOS. Search IFM.org for Miami providers.\n\n30-DAY MILESTONES\nWeeks 1-2: Supplement routine established, constipation improving, sleep quality improving\nWeeks 3-4: Emotional regulation improving, feeling less cold\nMonth 2-3: Progesterone levels measurably improving on repeat labs\nMonth 4-6: Melasma responding alongside your skincare routine';
+
+var DEFAULT_INV = [
+  {name:'Wild Sockeye Salmon (frozen)',cat:'Protein',qty:2,unit:'bags',days:14,emoji:'🐟'},
+  {name:'Kirkland Greek Yogurt',cat:'Dairy',qty:1,unit:'tub',days:10,emoji:'🥛'},
+  {name:'Lifeway Plain Kefir',cat:'Dairy',qty:1,unit:'carton',days:7,emoji:'🥛'},
+  {name:'Kirkland Pasture-Raised Eggs',cat:'Protein',qty:60,unit:'count',days:21,emoji:'🥚'},
+  {name:'Organic Baby Spinach',cat:'Vegetables',qty:2,unit:'bags',days:7,emoji:'🥬'},
+  {name:'Organic Avocados',cat:'Vegetables',qty:8,unit:'count',days:7,emoji:'🥑'},
+  {name:'Organic Black Beans',cat:'Legumes',qty:6,unit:'cans',days:30,emoji:'🫘'},
+  {name:'Organic Chickpeas',cat:'Legumes',qty:6,unit:'cans',days:30,emoji:'🫘'},
+  {name:'Kirkland Dried Lentils',cat:'Legumes',qty:1,unit:'bag',days:60,emoji:'🫘'},
+  {name:'Organic Chia Seeds',cat:'Nuts & Seeds',qty:1,unit:'bag',days:30,emoji:'🌱'},
+  {name:'Organic Pumpkin Seeds',cat:'Nuts & Seeds',qty:1,unit:'bag',days:21,emoji:'🎃'},
+  {name:'Kirkland EVOO',cat:'Oils',qty:1,unit:'tin',days:60,emoji:'🫒'},
+  {name:'Spearmint Tea',cat:'Pantry',qty:2,unit:'boxes',days:30,emoji:'🍵'},
+  {name:'Lindt 85% Dark Chocolate',cat:'Pantry',qty:3,unit:'bars',days:21,emoji:'🍫'},
+  {name:'Wild Planet Albacore Tuna',cat:'Protein',qty:6,unit:'cans',days:30,emoji:'🐟'},
+  {name:'Organic Mixed Berries (frozen)',cat:'Frozen',qty:2,unit:'bags',days:30,emoji:'🫐'},
+];
+
+var COSTCO_LIST = [
+  {cat:'🏁 Pantry & Dry Goods (Center Aisles First)',items:[
+    {name:'Kirkland Extra Virgin Olive Oil',detail:'Large tin · passes purity tests',brand:'Kirkland'},
+    {name:'Chosen Foods Avocado Oil',detail:'High heat cooking · single ingredient',brand:'Chosen Foods'},
+    {name:'Organic Apple Cider Vinegar with Mother',detail:'Large bottle · pre-meal shot',brand:'Organic'},
+    {name:'Kirkland Organic Bone Broth (6-pack)',detail:'Gut healing + collagen · zero additives',brand:'Kirkland Organic'},
+    {name:'Organic Turmeric (large)',detail:'Use daily with black pepper',brand:'Kirkland'},
+    {name:'Ceylon Cinnamon organic',detail:'Blood sugar regulation · use daily',brand:'Organic'},
+    {name:'Lindt 85%+ Dark Chocolate',detail:'1-2 squares daily · magnesium',brand:'Lindt 85%'},
+    {name:'Organic Raw Honey',detail:'Golden milk + occasional use',brand:'Organic'},
+  ]},
+  {cat:'🥫 Canned & Packaged',items:[
+    {name:'Kirkland Organic Black Beans (case)',detail:'BPA-free · top inositol source for PCOS',brand:'Kirkland Organic'},
+    {name:'Organic Canned Chickpeas (case)',detail:'BPA-free · second highest inositol',brand:'Organic'},
+    {name:'Kirkland Organic Hummus',detail:'Ingredients: chickpeas, tahini, EVOO, lemon, garlic, salt ONLY',brand:'Kirkland'},
+    {name:'Wild Planet Albacore Tuna (6-pack)',detail:'Mercury tested · tuna + salt only',brand:'Wild Planet'},
+  ]},
+  {cat:'💊 Health & Teas',items:[
+    {name:'Traditional Medicinals Spearmint Tea',detail:'2 cups daily · most important PCOS habit',brand:'Traditional Medicinals'},
+    {name:'Organic Chamomile Tea',detail:'Bedtime wind-down',brand:'Organic'},
+  ]},
+  {cat:'🥦 Frozen (Back Left Wall)',items:[
+    {name:'Kirkland Wild Alaskan Sockeye Salmon',detail:'Individually wrapped fillets · wild caught',brand:'Kirkland'},
+    {name:'Kirkland Organic Frozen Mixed Berries',detail:'Large bag · no added sugar',brand:'Kirkland Organic'},
+    {name:'Organic Frozen Broccoli Florets',detail:'DIM source for estrogen metabolism',brand:'Organic'},
+  ]},
+  {cat:'🥛 Dairy & Refrigerated (Back Right Wall)',items:[
+    {name:'Kirkland Organic Greek Yogurt plain',detail:'Check label: no thickeners',brand:'Kirkland Organic'},
+    {name:'Lifeway Plain Whole Milk Kefir',detail:'12 probiotic strains · no added sugar',brand:'Lifeway'},
+    {name:'Kirkland Pasture-Raised Eggs (60 count)',detail:'Cleanest option at Costco',brand:'Kirkland'},
+  ]},
+  {cat:'🥩 Fresh Meat (Back Cases)',items:[
+    {name:'Kirkland Organic Chicken Thighs',detail:'No antibiotics or hormones',brand:'Kirkland Organic'},
+    {name:'Kirkland Grass-Fed Beef',detail:'Must say "grass-fed" on label',brand:'Kirkland'},
+  ]},
+  {cat:'🥬 Fresh Produce (Right Side)',items:[
+    {name:'Kirkland Organic Baby Spinach (large bag)',detail:'Use within 1 week',brand:'Kirkland Organic'},
+    {name:'Organic Broccoli',detail:'Daily cruciferous DIM source',brand:'Organic'},
+    {name:'Organic Brussels Sprouts',detail:'Estrogen clearance · roast at 400°F',brand:'Organic'},
+    {name:'Organic Red Bell Peppers (6-pack)',detail:'Daily vitamin C — 190mg per pepper',brand:'Organic'},
+    {name:'Avocados (large bag)',detail:'Hormone building blocks',brand:'Any'},
+    {name:'Organic Lemons (large bag)',detail:'Daily in water + dressing',brand:'Organic'},
+    {name:'Organic Garlic (large bag)',detail:'Every meal · prebiotic',brand:'Organic'},
+    {name:'Brazil Nuts (small bag)',detail:'2-3 daily MAX · selenium for thyroid',brand:'Any'},
+  ]},
+  {cat:'🌰 Nuts, Seeds & Legumes (End Caps)',items:[
+    {name:'Kirkland Organic Raw Pumpkin Seeds',detail:'Daily zinc + magnesium · on everything',brand:'Kirkland Organic'},
+    {name:'Organic Chia Seeds (large bag)',detail:'Daily fiber + gut motility',brand:'Any Organic'},
+    {name:'Raw Almonds unsalted (large bag)',detail:'Magnesium + vitamin E',brand:'Any raw'},
+    {name:'Raw Walnuts unsalted (large bag)',detail:'Omega-3 ALA',brand:'Any raw'},
+    {name:'Organic Almond Butter',detail:'Ingredients: almonds ONLY',brand:'Kirkland Organic'},
+    {name:'Kirkland Dried Lentils',detail:'Highest inositol · cook Sunday batches',brand:'Kirkland'},
+  ]},
+  {cat:'💧 Beverages (Last)',items:[
+    {name:'La Croix or Waterloo Sparkling Water',detail:'Variety pack · zero additives',brand:'La Croix/Waterloo'},
+  ]},
+];
+
+var RECIPES = [
+  {id:'r1',cat:'breakfast',emoji:'🍳',title:'Savory PCOS Egg Bowl',time:'12 min',pcos:true,cals:420,protein:38,carbs:12,fat:22,fiber:8,omega:0.2,ingredients:['3 pasture-raised eggs','1 cup organic baby spinach','½ cup black beans (rinsed)','½ avocado','1 red bell pepper, sliced','½ cup plain Greek yogurt (side)','Garlic, avocado oil, turmeric, black pepper'],steps:['Sauté garlic + spinach in avocado oil 2 min','Add eggs, scramble until just set','Warm black beans in same pan','Serve with raw bell pepper, avocado, yogurt','Season with turmeric + black pepper'],notes:'Take Metformin 500mg midway through this meal. Bell pepper = your daily vitamin C target in one serving. Black beans = top inositol source for PCOS.'},
+  {id:'r2',cat:'breakfast',emoji:'🫐',title:'Chia Yogurt Power Bowl',time:'5 min (overnight)',pcos:true,cals:310,protein:24,carbs:30,fat:12,fiber:14,omega:2.4,ingredients:['1 cup full-fat plain Greek yogurt','2 tbsp organic chia seeds (soaked overnight)','1 cup mixed frozen berries (thawed)','1 kiwi, sliced','1 tbsp pumpkin seeds','1 tbsp ground flaxseed','3 Brazil nuts','Dash of cinnamon'],steps:['Night before: mix chia seeds into yogurt, refrigerate','Morning: top with thawed berries, kiwi, seeds','Add Brazil nuts (2-3 max)','Dust with cinnamon'],notes:'2 Brazil nuts = your entire daily selenium dose for thyroid and Hashimoto\'s support.'},
+  {id:'r3',cat:'lunch',emoji:'🥗',title:'PCOS Power Bowl with Salmon',time:'20 min',pcos:true,cals:490,protein:42,carbs:22,fat:24,fiber:9,omega:1.8,ingredients:['5oz wild sockeye salmon fillet','½ cup cooked lentils','2 cups organic baby spinach','1 cup broccoli florets (steamed)','½ red bell pepper','½ avocado','Dressing: EVOO + lemon + turmeric + black pepper'],steps:['Season salmon with salt, pepper, lemon','Pan-sear in avocado oil 3-4 min each side','Steam broccoli 4 min — keep it crisp','Build bowl: spinach, lentils, broccoli, bell pepper','Top with salmon + avocado, drizzle dressing'],notes:'Lentils = highest inositol of any food. Salmon = 1.8g EPA+DHA hitting daily omega-3 target in one meal.'},
+  {id:'r4',cat:'dinner',emoji:'🥩',title:'Grass-Fed Beef + Cruciferous Bowl',time:'25 min',pcos:true,cals:520,protein:46,carbs:28,fat:18,fiber:12,omega:0.2,ingredients:['5oz grass-fed sirloin','2 cups Brussels sprouts, halved','½ cup cooked lentils','1 cup broccoli','Garlic, ginger, EVOO','Lemon juice, Himalayan salt'],steps:['Season beef with salt, pepper, garlic powder','Sear in avocado oil 3-4 min each side','Roast Brussels at 400°F 18 min with EVOO','Steam broccoli 3 min','Rest beef 5 min, slice thin, serve over lentils + veg','Take Metformin 500mg midway through'],notes:'Grass-fed beef = best dietary zinc source. Brussels + broccoli = double DIM hit for estrogen clearance.'},
+  {id:'r5',cat:'snack',emoji:'🥑',title:'Avocado + Pumpkin Seed Snack',time:'3 min',cals:220,protein:5,carbs:8,fat:20,fiber:7,omega:0.2,ingredients:['½ avocado','2 tbsp pumpkin seeds (raw)','Lemon juice + Himalayan salt','Chili flakes (optional)'],steps:['Halve avocado, remove pit','Squeeze lemon, top with pumpkin seeds + salt','Eat from the shell'],notes:'Pumpkin seeds = highest zinc + magnesium snack. This combo directly supports progesterone production.'},
+  {id:'r6',cat:'snack',emoji:'🍫',title:'Dark Chocolate & Nut Bites',time:'2 min',cals:180,protein:5,carbs:12,fat:14,fiber:4,omega:0.1,ingredients:['2 squares 85%+ dark chocolate','12 raw almonds','3 Brazil nuts'],steps:['Arrange on a plate','Eat slowly'],notes:'2 squares 85% dark chocolate = 32mg magnesium. Brazil nuts = daily selenium. A genuinely therapeutic snack.'},
+  {id:'r7',cat:'prep',emoji:'📦',title:'Sunday Batch: Lentils + Beans',time:'45 min',cals:0,protein:0,carbs:0,fat:0,fiber:0,omega:0,ingredients:['2 cups dried green lentils','2 cans black beans (rinsed)','2 cans chickpeas (rinsed)','Bay leaf, garlic, cumin','Lemon + EVOO + parsley'],steps:['Simmer lentils with bay leaf + garlic 20-25 min','Season with cumin + salt, cool','Rinse beans, toss with lemon + EVOO','Store in glass containers — fridge 5 days'],notes:'Sunday prep is the single most impactful habit. Pre-cooked lentils make every meal take 5 minutes instead of 25.'},
+  {id:'r8',cat:'prep',emoji:'🥚',title:'Sunday Batch: Hard-Boiled Eggs',time:'15 min',cals:0,protein:0,carbs:0,fat:0,fiber:0,omega:0,ingredients:['8-10 pasture-raised eggs','Ice water bath'],steps:['Cold water start, bring to boil','Boil exactly 10 min','Ice bath 5 min immediately','Store in fridge up to 7 days'],notes:'Critical on semaglutide days when appetite is lowest but protein targets still apply. Instant protein anywhere.'},
+];
+
+// ── BOOT ──────────────────────────────────────────────────────
+window.onload = function() {
+  // Check for saved session
+  var session = lsGet('session');
+  if (session && session.email) {
+    USER = session;
+    var savedProfile = lsGet('profile_' + session.email);
+    if (savedProfile) {
+      PROFILE = savedProfile;
+      launchApp();
+    } else {
+      // Has session but no profile — start questionnaire
+      showScreen('s-quest');
+      startQuest();
+    }
+  }
+  // else: auth screen is already visible (default)
+};
+</script>
+</body>
+</html>
